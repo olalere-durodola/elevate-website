@@ -85,7 +85,7 @@ var SEED_TEAMS = [
       { date: "2026-08-22", opponent: "North Texas Thunder", venue: "Celina HS Gym", status: "upcoming", result: "10:30 AM" }
     ],
     roster: [
-      { number: "04", position: "Guard", name: "Micah Zae", height: "4'10″", grade: "5th" },
+      { number: "04", position: "Guard", name: "Micah Dawson", height: "4'10″", grade: "5th" },
       { number: "08", position: "Guard", name: "Ryan Cole", height: "4'11″", grade: "5th" },
       { number: "12", position: "Wing", name: "Josiah Bell", height: "5'0″", grade: "5th" },
       { number: "20", position: "Forward", name: "Ethan Park", height: "5'2″", grade: "5th" },
@@ -113,7 +113,7 @@ var SEED_TEAMS = [
       { date: "2026-08-22", opponent: "North Texas Thunder", venue: "Celina HS Gym", status: "upcoming", result: "12:30 PM" }
     ],
     roster: [
-      { number: "02", position: "Guard", name: "Aiden Zae", height: "5'1″", grade: "6th" },
+      { number: "02", position: "Guard", name: "Aiden Reyes", height: "5'1″", grade: "6th" },
       { number: "09", position: "Guard", name: "Noah Vance", height: "5'0″", grade: "6th" },
       { number: "15", position: "Wing", name: "Kai Thompson", height: "5'3″", grade: "6th" },
       { number: "22", position: "Forward", name: "Brady Nolan", height: "5'5″", grade: "6th" },
@@ -200,7 +200,7 @@ var SEED_TEAMS = [
       { date: "2026-08-21", opponent: "North Texas Thunder", venue: "Prosper HS", status: "upcoming", result: "5:30 PM" }
     ],
     roster: [
-      { number: "06", position: "Guard", name: "Chase Zae", height: "5'11″", grade: "Soph" },
+      { number: "06", position: "Guard", name: "Chase Whitfield", height: "5'11″", grade: "Soph" },
       { number: "10", position: "Guard", name: "Nico Ferrara", height: "6'0″", grade: "Fresh" },
       { number: "17", position: "Wing", name: "Malik Boone", height: "6'2″", grade: "Soph" },
       { number: "27", position: "Forward", name: "Ari Feldman", height: "6'3″", grade: "Soph" },
