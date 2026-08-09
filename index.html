@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elevate Basketball</title>
+<meta name="description" content="Elevate Basketball, Prosper TX. Schedules, rosters, practice times and tryout requests for 5th grade through varsity.">
+<link rel="icon" href="assets/logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,300..900&family=Sora:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/console.css">
+</head>
+<body>
+
+<nav class="ladder" aria-label="Program teams">
+  <div class="ladder-cap" id="ladderTop">&nbsp;</div>
+  <div class="rungs" id="rungs"><div class="spine"></div><div class="rmark" id="rmark"></div></div>
+  <div class="ladder-foot" id="ladderFoot">&nbsp;</div>
+</nav>
+
+<div class="wrap" id="wrap">
+
+<div class="nav">
+  <div class="inner nav-in">
+    <a href="#top"><img class="logo" src="assets/logo.jpg" alt="Elevate Basketball"></a>
+    <div class="nav-links">
+      <a href="#game">Next game</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#week">Practice</a>
+      <a href="#roster">Roster</a>
+      <a href="#program">Program</a>
+      <a href="#join">Join</a>
+    </div>
+    <a href="#join" class="btn">Request tryout</a>
+  </div>
+</div>
+
+<div class="mrail" aria-label="Program teams"><div class="mrail-in" id="mrungs"></div></div>
+
+<section class="alerts" id="alerts" hidden>
+  <div class="inner" id="alertBody"></div>
+</section>
+
+<header class="head" id="top">
+  <canvas id="arcfx" aria-hidden="true"></canvas>
+  <div class="inner">
+    <div class="eyebrow" id="eyebrowLine">&nbsp;</div>
+    <h1 class="h1" id="teamTitle">&nbsp;</h1>
+    <p class="claim" id="claim">&nbsp;</p>
+    <div class="cutline"></div>
+    <div class="subline">
+      <div>Record <b id="mRec">&mdash;</b></div>
+      <div>Coach <b id="mCoach">&mdash;</b></div>
+      <div>Home gym <b id="mGym">&mdash;</b></div>
+    </div>
+    <a href="#game" class="cue">Scroll<span></span></a>
+  </div>
+</header>
+
+<section class="sec" id="game" style="border-top:none;padding-top:0">
+  <div class="inner">
+    <div class="game">
+      <div class="game-l">
+        <div class="klabel">Next game</div>
+        <div class="vs">
+          <div class="team"><div class="crest">EL</div><div><div class="team-n">Elevate</div><div class="team-r" id="gUs">&mdash;</div></div></div>
+          <div class="vs-x">VS</div>
+          <div class="team"><div class="crest opp" id="oCrest">--</div><div><div class="team-n" id="gOpp">&mdash;</div><div class="team-r" id="gOppR">&mdash;</div></div></div>
+        </div>
+        <div class="meta">
+          <div><div class="meta-k">Tip-off</div><div class="meta-v" id="gTime">&mdash;</div></div>
+          <div><div class="meta-k">Be there by</div><div class="meta-v"><em id="gArrive">&mdash;</em></div></div>
+          <div><div class="meta-k">Venue</div><div class="meta-v" id="gVenue">&mdash;</div></div>
+          <div><div class="meta-k">Jersey</div><div class="meta-v" id="gJersey">&mdash;</div></div>
+        </div>
+      </div>
+      <div class="game-r">
+        <div class="klabel" id="countLabel">Tip-off in</div>
+        <div class="count">
+          <div class="cu"><b id="cd">--</b><span>Days</span></div>
+          <div class="cu"><b id="ch">--</b><span>Hrs</span></div>
+          <div class="cu"><b id="cm">--</b><span>Min</span></div>
+          <div class="cu"><b id="cs">--</b><span>Sec</span></div>
+        </div>
+        <div class="stack">
+          <a href="#" class="btn" id="gDirections" target="_blank" rel="noopener">Get directions</a>
+          <a href="#" class="btn ghost" id="gCalendar">Add to calendar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="schedule">
+  <div class="inner">
+    <div class="sec-head"><div><span class="sec-n">01 / Season</span><h2 class="sec-t" id="schTitle">Schedule</h2></div></div>
+    <div id="schBody"></div>
+  </div>
+</section>
+
+<section class="sec" id="week">
+  <div class="inner">
+    <div class="sec-head"><div><span class="sec-n">02 / Every week</span><h2 class="sec-t">Practice and gyms</h2></div></div>
+    <div class="two">
+      <div class="cell">
+        <h3>Practice schedule</h3>
+        <div id="practice"></div>
+      </div>
+      <div class="cell">
+        <h3>Where we play</h3>
+        <div id="gymBody"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="roster">
+  <div class="inner">
+    <div class="sec-head"><div><span class="sec-n">03 / Team</span><h2 class="sec-t" id="rosTitle">Roster</h2></div></div>
+    <div class="roster" id="rosBody"></div>
+  </div>
+</section>
+
+<section class="sec" id="program">
+  <div class="inner">
+    <div class="sec-head"><div><span class="sec-n">04 / How it works</span><h2 class="sec-t" id="programTitle">Three years, three jobs</h2></div></div>
+    <div class="pillars" id="pillarBody"></div>
+    <div class="proof">
+      <div class="proof-k" id="proofLabel"></div>
+      <div class="proof-grid" id="proofBody"></div>
+      <div class="proof-list" id="proofNote"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="join">
+  <div class="inner">
+    <div class="sec-head"><div><span class="sec-n">05 / Get in</span><h2 class="sec-t">Join the program</h2></div></div>
+
+    <div class="formwrap" id="formwrap">
+      <p class="fintro" id="joinIntro"></p>
+      <div class="fgrid">
+        <div class="field">
+          <label for="f-name">Your name <b>*</b></label>
+          <input id="f-name" type="text" autocomplete="name" placeholder="Parent or guardian">
+          <div class="msg" id="m-name">Add your name</div>
+        </div>
+        <div class="field">
+          <label for="f-email">Email <b>*</b></label>
+          <input id="f-email" type="email" autocomplete="email" placeholder="you@email.com">
+          <div class="msg" id="m-email">Add a valid email</div>
+        </div>
+        <div class="field">
+          <label for="f-phone">Phone</label>
+          <input id="f-phone" type="tel" autocomplete="tel" placeholder="(214) 555-0134">
+          <div class="msg" id="m-phone">Check that number</div>
+        </div>
+        <div class="field">
+          <label for="f-reason">Reason for reaching out <b>*</b></label>
+          <select id="f-reason">
+            <option value="">Choose one</option>
+            <option>Tryout for a team</option>
+            <option>Join the waitlist</option>
+            <option>Sponsor the program</option>
+            <option>Something else</option>
+          </select>
+          <div class="msg" id="m-reason">Pick a reason</div>
+        </div>
+        <div class="field" id="wrap-player">
+          <label for="f-player">Player first name</label>
+          <input id="f-player" type="text" placeholder="First name only">
+        </div>
+        <div class="field" id="wrap-grade">
+          <label for="f-grade">Grade next season</label>
+          <select id="f-grade">
+            <option value="">Choose one</option>
+            <option>5th grade</option>
+            <option>6th grade</option>
+            <option>7th grade</option>
+            <option>8th grade</option>
+            <option>High school</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="f-msg">Anything we should know</label>
+          <textarea id="f-msg" placeholder="Experience, positions, schedule conflicts, questions."></textarea>
+        </div>
+        <div class="trap"><label for="f-trap">Leave blank</label><input id="f-trap" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="consent">
+          <input id="f-consent" type="checkbox">
+          <span>I am the parent or legal guardian and I agree to be contacted by a coach about this request. <b id="m-consent" style="display:none;color:var(--ion);font-weight:400"> Required.</b></span>
+        </div>
+        <div class="fsubmit">
+          <button class="btn" id="f-send" type="button">Send request</button>
+          <span class="fnote" id="f-note">Usually answered in 2 days</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sent" id="sent">
+      <h3>Request sent</h3>
+      <p>A coach will reach out at the email you gave us. If it's urgent, text the program director at the number in the contact section below.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="contact">
+  <div class="inner">
+    <div class="sec-head"><div><span class="sec-n">06 / Questions</span><h2 class="sec-t">Contact</h2></div></div>
+    <div class="two">
+      <div class="cell">
+        <h3>Team coach</h3>
+        <div class="prow"><div id="cCoach">&mdash;</div><span>Head coach</span></div>
+        <div class="prow"><div id="cMail">&mdash;</div><span>Email</span></div>
+        <div class="prow"><div>Text before 8pm</div><span>Preferred</span></div>
+      </div>
+      <div class="cell">
+        <h3>Program</h3>
+        <div id="contactBody"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="inner foot">
+  <img class="logo sm" src="assets/logo.jpg" alt="Elevate Basketball">
+  <small id="footNote"></small>
+  <button class="foot-edit" id="coachEntry" type="button">Coach sign-in</button>
+</footer>
+
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/seed.js"></script>
+<script src="assets/backend.js"></script>
+<script src="assets/site.js"></script>
+<script src="assets/hero.js"></script>
+<script src="assets/form.js"></script>
+<script src="assets/console.js"></script>
+</body>
+</html>
