@@ -182,6 +182,16 @@
   }
 
   function netRipple(strength) {
+    /* the rim takes it */
+    rim.style.transition = "none";
+    rim.style.opacity = String(Math.min(1, 0.5 + strength * 0.5));
+    rim.style.strokeWidth = String(1.5 + strength);
+    requestAnimationFrame(function () {
+      rim.style.transition = "opacity 520ms ease-out, stroke-width 520ms ease-out";
+      rim.style.opacity = "";
+      rim.style.strokeWidth = "";
+    });
+
     ripple.style.transition = "none";
     ripple.setAttribute("r", "3");
     ripple.style.opacity = String(0.85 * strength);

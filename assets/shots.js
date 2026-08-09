@@ -167,7 +167,7 @@
       ctx.stroke();
     }
 
-    if (ts > spawnAt) { addShot(); spawnAt = ts + 1200 + Math.random() * 1100; }
+    if (ts > spawnAt) { addShot(); spawnAt = ts + 850 + Math.random() * 850; }
 
     /* shots. The trail batches into 8 alpha buckets rather than stroking
        every segment separately — same look, a fifth of the draw calls. */
