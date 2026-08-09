@@ -19,7 +19,7 @@ var SEED_SITE = {
 
   /* Banner strip at the top. tone is "action" (pink) or "info" (blue). */
   alerts: [
-    { tone: "action", tag: "Action", body: "Tournament fees are due Friday. $45 per player, Venmo or check to Coach Reyes.", meta: "Posted Aug 4 · All teams" },
+    { tone: "action", tag: "Action", body: "Tournament fees are due Friday. $45 per player, Venmo or check to Coach Zae.", meta: "Posted Aug 4 · All teams" },
     { tone: "info", tag: "Update", body: "Thursday practice moved to Court 2. Same time, enter through the east doors.", meta: "Posted Aug 5 · 7th grade" }
   ],
 
@@ -29,14 +29,14 @@ var SEED_SITE = {
     { name: "McKinney Sports Center", address: "2400 Wilson Creek Pkwy, McKinney, TX 75069", note: "Court 4, upstairs" }
   ],
 
-  programTitle: "Three years, three jobs",
+  programTitle: "Three stages, three jobs",
   pillars: [
-    { label: "5th – 6th grade", title: "Develop", body: "Footwork, both hands, and a shot that survives contact. Everyone plays real minutes. We do not run a bench at this level, and we do not chase trophies with a six-man rotation.", linkText: "Explore development" },
-    { label: "7th – 8th grade", title: "Compete", body: "Tournament schedule, scouting reports, and film every week. Minutes are earned here, and players learn to handle that before high school does it to them.", linkText: "Explore competition" },
-    { label: "JV – Varsity", title: "Advance", body: "Strength work, position-specific coaching, and honest conversations about where each player fits at the next level. We prepare for the school program, not around it.", linkText: "Explore advancement" }
+    { label: "5th – 6th grade", title: "Develop", body: "Footwork, both hands, and a shot that survives contact. Everyone plays real minutes. We do not run a bench at this level, and we do not chase trophies with a six-man rotation.", linkText: "Ask about a 5th–6th spot" },
+    { label: "7th – 8th grade", title: "Compete", body: "Tournament schedule, scouting reports, and film every week. Minutes are earned here, and players learn to handle that before high school does it to them.", linkText: "Ask about a 7th–8th spot" },
+    { label: "JV – Varsity", title: "Advance", body: "Strength work, position-specific coaching, and honest conversations about where each player fits at the next level. We prepare for the school program, not around it.", linkText: "Ask about JV and varsity" }
   ],
 
-  proofLabel: "What that has produced — replace with your real numbers",
+  proofLabel: "What three seasons have produced",
   stats: [
     { value: 31, suffix: "", label: "Players who made their high school roster in the last three seasons" },
     { value: 86, suffix: "%", label: "Of players who start with us at 5th grade are still playing in 9th" },
@@ -45,11 +45,19 @@ var SEED_SITE = {
   /* Wrap a phrase in *asterisks* to make it stand out. */
   proofNote: "Coaching staff has come through *Prosper HS*, *Texas A&M-Commerce*, and *Dallas Showtyme*. Alumni now play at *Prosper*, *Rock Hill*, *Walnut Grove*, and *Celina*.",
 
+  /* Shown after a request is sent. Never point at a channel that
+     does not exist — there is no phone number anywhere on this site. */
+  sentBody: "Coach Zae will email you at the address you gave us, within two days. If you have not heard by then, reply to that address and we will chase it.",
+
+  /* Caption under the photo band. Leave photo empty until you have one. */
+  photo: "",
+  plateLine: "Prosper Fieldhouse · 6:45 AM",
+
   joinIntro: "Tryouts run twice a year, and we carry a short waitlist between them. Tell us about your player and a coach will follow up within two days. Parents and guardians only, please.",
 
   contactRows: [
-    { value: "Coach Reyes", label: "Director" },
-    { value: "director@elevatehoops.com", label: "Email" },
+    { value: "Coach Zae", label: "Director" },
+    { value: "zae@elevatehoops.com", label: "Email" },
     { value: "Fees, tryouts, uniforms", label: "Ask about" }
   ]
 };
@@ -59,7 +67,7 @@ var SEED_SITE = {
 var SEED_TEAMS = [
   {
     id: "5th", name: "5th grade", record: "9-5",
-    coach: "Coach Dawson", coachEmail: "dawson@elevatehoops.com", homeGym: "Prosper Fieldhouse",
+    coach: "Coach Zae", coachEmail: "zae@elevatehoops.com", homeGym: "Prosper Fieldhouse",
     nextGame: {
       opponent: "Celina Storm", opponentRecord: "7-7",
       tipoff: "2026-08-15T09:00", arriveBy: "8:15 AM, warmups",
@@ -87,7 +95,7 @@ var SEED_TEAMS = [
   },
   {
     id: "6th", name: "6th grade", record: "12-3",
-    coach: "Coach Ellis", coachEmail: "ellis@elevatehoops.com", homeGym: "Prosper Fieldhouse",
+    coach: "Coach Zae", coachEmail: "zae@elevatehoops.com", homeGym: "Prosper Fieldhouse",
     nextGame: {
       opponent: "Allen Elite", opponentRecord: "10-6",
       tipoff: "2026-08-15T11:00", arriveBy: "10:15 AM, warmups",
@@ -115,7 +123,7 @@ var SEED_TEAMS = [
   },
   {
     id: "7th", name: "7th grade", record: "18-4",
-    coach: "Coach Whitfield", coachEmail: "whitfield@elevatehoops.com", homeGym: "Prosper Fieldhouse",
+    coach: "Coach Zae", coachEmail: "zae@elevatehoops.com", homeGym: "Prosper Fieldhouse",
     nextGame: {
       opponent: "North Texas Thunder", opponentRecord: "15-7",
       tipoff: "2026-08-15T16:30", arriveBy: "3:45 PM, warmups",
@@ -146,7 +154,7 @@ var SEED_TEAMS = [
   },
   {
     id: "8th", name: "8th grade", record: "15-6",
-    coach: "Coach Barrett", coachEmail: "barrett@elevatehoops.com", homeGym: "Prosper Fieldhouse",
+    coach: "Coach Zae", coachEmail: "zae@elevatehoops.com", homeGym: "Prosper Fieldhouse",
     nextGame: {
       opponent: "McKinney Havoc", opponentRecord: "13-8",
       tipoff: "2026-08-15T18:15", arriveBy: "5:30 PM, warmups",
@@ -174,7 +182,7 @@ var SEED_TEAMS = [
   },
   {
     id: "JV", name: "Junior varsity", record: "11-8",
-    coach: "Coach Whitfield", coachEmail: "whitfield@elevatehoops.com", homeGym: "Prosper HS Auxiliary",
+    coach: "Coach Zae", coachEmail: "zae@elevatehoops.com", homeGym: "Prosper HS Auxiliary",
     nextGame: {
       opponent: "Frisco Force", opponentRecord: "12-9",
       tipoff: "2026-08-14T17:30", arriveBy: "4:30 PM, film first",
@@ -202,7 +210,7 @@ var SEED_TEAMS = [
   },
   {
     id: "VAR", name: "Varsity", record: "21-5",
-    coach: "Coach Barrett", coachEmail: "barrett@elevatehoops.com", homeGym: "Prosper HS Main",
+    coach: "Coach Zae", coachEmail: "zae@elevatehoops.com", homeGym: "Prosper HS Main",
     nextGame: {
       opponent: "Allen Elite", opponentRecord: "19-6",
       tipoff: "2026-08-14T19:30", arriveBy: "5:45 PM, film first",

@@ -12,9 +12,16 @@
 
   function el(id) { return document.getElementById(id); }
 
+  /* The visual state and the programmatic state have to move together, or a
+     screen-reader user gets a form that looks wrong and sounds fine. */
   function flag(id, bad) {
     var field = el("f-" + id), msg = el("m-" + id);
-    if (field) field.classList.toggle("bad", bad);
+    if (field) {
+      field.classList.toggle("bad", bad);
+      field.setAttribute("aria-invalid", bad ? "true" : "false");
+      if (bad) field.setAttribute("aria-describedby", "m-" + id);
+      else field.removeAttribute("aria-describedby");
+    }
     if (msg) msg.classList.toggle("show", bad);
     return !bad;
   }
@@ -49,8 +56,13 @@
     el("m-consent").style.display = consented ? "none" : "inline";
 
     if (!valid || !consented) {
+      var problems = document.querySelectorAll(".field .msg.show").length + (consented ? 0 : 1);
+      Site.announce(problems === 1
+        ? "One field needs attention."
+        : problems + " fields need attention.");
       var firstBad = document.querySelector(".field input.bad,.field select.bad");
       if (firstBad) firstBad.focus();
+      else if (!consented) el("f-consent").focus();
       return;
     }
 
@@ -83,13 +95,24 @@
     });
   }
 
+  /* Focus moves to the confirmation and it is announced. Previously the form
+     vanished, a panel appeared, and a screen-reader user heard nothing. */
   function showSent() {
     el("formwrap").style.display = "none";
-    el("sent").classList.add("show");
-    el("sent").scrollIntoView({ block: "center" });
+    var sent = el("sent");
+    sent.classList.add("show");
+    sent.scrollIntoView({ block: "center" });
+    sent.focus();
+    Site.announce("Request sent. " + (el("sentBody") ? el("sentBody").textContent : ""));
   }
 
-  el("f-send").addEventListener("click", submit);
+  var form = el("joinForm");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();     /* Enter in any field now submits, as it should */
+      submit();
+    });
+  }
 
   ["name", "email", "phone", "reason"].forEach(function (key) {
     var field = el("f-" + key);

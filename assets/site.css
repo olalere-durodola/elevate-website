@@ -5,8 +5,14 @@
   --void:#000000;
   --deep:#0B0B11;
   --panel:#131319;
+  /* Second ground. A gym floor under arena lights at 7:30 on a Tuesday.
+     Two grounds is what stops the page reading as "black with one accent". */
+  --floor:#0C1A2A;
   --line:rgba(144,187,232,.17);
   --line-2:rgba(144,187,232,.36);
+  /* Borders of real controls need 3:1 to be perceivable. --line is 1.19:1,
+     which is fine for decorative hairlines and not for an input. */
+  --line-ui:rgba(144,187,232,.52);
   --chalk:#F0F3F8;
   --dim:#7C8AA0;
   --rail:104px;
@@ -16,6 +22,40 @@
   --t3:19px;
   --t4:15px;
   --label:10px;
+
+  /* ── BALLISTIC ── a body under gravity. Never on data. */
+  --e-release:cubic-bezier(.12,.78,.28,1);   /* leaves the hand */
+  --e-hang:cubic-bezier(.34,.02,.28,1);      /* apex float */
+  --e-net:cubic-bezier(.2,1.24,.34,1);       /* absorbed, slight give */
+
+  /* ── INSTRUMENT ── a scoreboard. Never on bodies. */
+  --e-tick:cubic-bezier(.9,0,1,1);           /* mechanical */
+  --e-read:cubic-bezier(.2,0,0,1);           /* data settling, no bounce */
+
+  /* durations named for the sport */
+  --d-whistle:90ms;    /* acknowledgement */
+  --d-pass:190ms;      /* one element handing to another */
+  --d-shot:420ms;      /* something travelling */
+  --d-poss:760ms;      /* a sequence resolving */
+  --stag:34ms;         /* box-score row cadence */
+  --stag-max:170ms;
+}
+
+/* Reached by keyboard only. */
+.skip{
+  position:fixed;left:8px;top:-60px;z-index:300;
+  background:var(--ion);color:#12000A;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:12px 18px;text-decoration:none;
+  transition:top var(--d-pass) var(--e-read);
+}
+.skip:focus{top:8px}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;
+  padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -65,9 +105,10 @@ a{color:inherit}
 .head{padding:54px 0 0}
 .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.26em;color:var(--peri);text-transform:uppercase;margin-bottom:18px}
 .h1{position:relative;display:inline-block;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:var(--t1);line-height:.9;text-transform:uppercase;letter-spacing:-.015em}
-.h1::after{content:'';position:absolute;left:-4px;right:-14px;top:50%;height:6px;background:var(--void);transform:translateY(-2px)}
+/* The free-throw semicircle used to hang below this rule and cut straight
+   through the coach line at every width. The court geometry now lives in
+   the arc spine, where it has room. */
 .cutline{position:relative;margin:30px 0 0;height:1px;background:var(--peri);opacity:.55}
-.cutline::after{content:'';position:absolute;left:52px;top:0;width:132px;height:66px;border:1px solid var(--peri);border-top:none;border-radius:0 0 132px 132px;opacity:.42}
 .claim{margin-top:24px;font-size:20px;line-height:1.5;max-width:520px;color:var(--dim);font-weight:300}
 .claim b{color:var(--chalk);font-weight:400}
 
@@ -158,15 +199,16 @@ a{color:inherit}
 .field.full{grid-column:1/-1}
 .field label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-bottom:9px}
 .field label b{color:var(--ion);font-weight:400}
-.field input,.field select,.field textarea{background:var(--void);border:1px solid var(--line);color:var(--chalk);font-family:'Sora',sans-serif;font-size:15px;font-weight:300;padding:13px 14px;width:100%;transition:border-color .18s}
+.field input,.field select,.field textarea{background:var(--void);border:1px solid var(--line-ui);color:var(--chalk);font-family:'Sora',sans-serif;font-size:15px;font-weight:300;padding:13px 14px;width:100%;transition:border-color .18s}
 .field textarea{resize:vertical;min-height:104px;line-height:1.6}
 .field select{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);background-position:calc(100% - 20px) 20px,calc(100% - 14px) 20px;background-size:6px 6px;background-repeat:no-repeat}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--ion)}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:2px solid var(--peri);outline-offset:2px;border-color:var(--ion)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ion)}
 .field input.bad,.field select.bad,.field textarea.bad{border-color:var(--ion)}
 .field .msg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ion);margin-top:7px;display:none}
 .field .msg.show{display:block}
-.consent{grid-column:1/-1;display:flex;gap:12px;align-items:flex-start;border-top:1px solid var(--line);padding-top:22px}
-.consent input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--ion)}
+.consent{grid-column:1/-1;cursor:pointer;display:flex;gap:12px;align-items:flex-start;border-top:1px solid var(--line);padding-top:22px}
+.consent input{width:24px;height:24px;flex:none;margin-top:2px;accent-color:var(--ion)}
 .consent span{font-size:13px;color:var(--dim);line-height:1.6}
 .fsubmit{grid-column:1/-1;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .fnote{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim)}
@@ -196,46 +238,31 @@ a{color:inherit}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
 
 /* ================= motion ================= */
-.rv{opacity:0;transform:translateY(24px);will-change:opacity,transform}
+.rv{opacity:0;transform:translateY(14px);will-change:opacity,transform}
+.rv.in{will-change:auto}
 .rv.in{opacity:1;transform:none}
 .draw{transform:scaleX(0);transform-origin:left}
 .draw.in{transform:scaleX(1)}
-.cutline.draw::after{opacity:0}
-.cutline.draw.in::after{opacity:.42}
-.cue{display:inline-flex;align-items:center;gap:13px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.24em;color:var(--dim);text-transform:uppercase;text-decoration:none;margin:-20px 0 44px}
-.cue span{width:1px;height:30px;background:var(--peri);display:block;transform-origin:top}
-.cue:hover{color:var(--chalk)}
 .rmark{position:absolute;left:50%;top:0;width:7px;height:7px;background:var(--ion);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 5px rgba(248,10,144,.15);opacity:0;z-index:2;pointer-events:none}
-.nav.tight .nav-in{height:58px}
-.nav.tight .logo{height:27px}
+.nav.tight .nav-in>*{transform:scale(.87);transform-origin:left center}
+
 .pillar a i,.gym a i{display:inline-block;font-style:normal;margin-left:9px}
 .pillar a:hover i,.gym a:hover i{transform:translateX(7px)}
 .pl,.row,.clip{will-change:auto}
 
 @media(prefers-reduced-motion:no-preference){
-  .rv{transition:opacity .85s cubic-bezier(.16,1,.3,1),transform .85s cubic-bezier(.16,1,.3,1)}
-  .draw{transition:transform 1.05s cubic-bezier(.16,1,.3,1)}
-  .cutline.draw::after{transition:opacity .7s .4s}
-  .rmark{transition:top .5s cubic-bezier(.34,1.35,.5,1),opacity .3s}
-  .nav-in,.logo{transition:height .35s cubic-bezier(.16,1,.3,1)}
-  .pillar a i,.gym a i{transition:transform .28s cubic-bezier(.16,1,.3,1)}
-  .cue span{animation:dive 2s ease-in-out infinite}
+  .rv{transition:opacity 340ms var(--e-read),transform 340ms var(--e-read)}
+  .draw{transition:transform 620ms var(--e-read)}
+  .rmark{transition:top var(--d-pass) var(--e-tick),opacity var(--d-pass)}
+  .nav-in>*{transition:transform var(--d-pass) var(--e-read)}
+  .pillar a i,.gym a i{transition:transform var(--d-pass) var(--e-release)}
 }
-@keyframes dive{0%,100%{transform:scaleY(.3);opacity:.25}50%{transform:scaleY(1);opacity:1}}
 
-/* ================= hero animation ================= */
 .head{position:relative;overflow:hidden;min-height:520px}
 .head .inner{position:relative;z-index:2}
-#arcfx{
-  position:absolute;top:0;right:0;height:100%;width:62%;
-  pointer-events:none;z-index:1;
-  -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 34%,#000 100%);
-  mask-image:linear-gradient(to right,transparent 0%,#000 34%,#000 100%);
-}
 @media(max-width:900px){
   .head{min-height:0}
-  #arcfx{width:100%;opacity:.42;-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 45%);mask-image:linear-gradient(to bottom,transparent 0%,#000 45%)}
-}
+  }
 
 /* ================= silk ================= */
 
@@ -250,18 +277,17 @@ section[id],header[id]{scroll-margin-top:104px}
 html.fonts-loading .h1,html.fonts-loading .sec-t,html.fonts-loading .mark{opacity:0}
 .h1,.sec-t{transition:opacity .3s ease}
 
-/* heading words stagger */
-.w{display:inline-block;opacity:0;transform:translateY(.38em)}
-.w.in{opacity:1;transform:none}
 
-/* pointer-tracked glow on cards */
+/* Pointer glow survives on the four program pillars only. Across a
+   20-card roster it measured 50fps and a 53ms long task, and the jersey
+   numeral warming to pink already says "hovered" in the site's own voice. */
 .pl,.pillar{position:relative;isolation:isolate}
 .pl>*,.pillar>*{position:relative;z-index:1}
-.pl::before,.pillar::before{
+.pillar::before{
   content:'';position:absolute;inset:0;z-index:0;opacity:0;
   background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(248,10,144,.13),transparent 68%);
 }
-.pl:hover::before,.pillar:hover::before{opacity:1}
+.pillar:hover::before{opacity:1}
 
 /* schedule rows get an accent that wipes in from centre */
 .row{position:relative}
@@ -273,9 +299,9 @@ html.fonts-loading .h1,html.fonts-loading .sec-t,html.fonts-loading .mark{opacit
 
 /* countdown digits roll rather than snap */
 .cu b{display:block;position:relative}
-.cu b.roll{animation:roll .42s cubic-bezier(.16,1,.3,1)}
+.cu b.roll{animation:roll var(--d-whistle) var(--e-tick)}
 @keyframes roll{
-  0%{transform:translateY(-52%);opacity:0}
+  0%{transform:translateY(-38%);opacity:.3}
   100%{transform:translateY(0);opacity:1}
 }
 
@@ -283,16 +309,308 @@ html.fonts-loading .h1,html.fonts-loading .sec-t,html.fonts-loading .mark{opacit
 .mrail{scroll-snap-type:x proximity;overscroll-behavior-x:contain}
 .mrail button{scroll-snap-align:center}
 
-/* cross-fade the whole page body on team switch */
-::view-transition-old(root),::view-transition-new(root){animation-duration:.42s}
+/* ============================================================
+   THE SUBSTITUTION
+   The old full-page cross-fade snapshotted a 1440x4000 document twice
+   and cost a 118ms long task and a 250ms frame on a mid-range Android,
+   to produce a grey wash. Only two elements transition now: the name
+   arcs (ballistic), the marker snaps (instrument). Everything else on
+   the page holds perfectly still, which is what makes the moving parts
+   read as deliberate.
+   ============================================================ */
+html.switching{view-transition-name:none}
+#teamTitle{view-transition-name:team-title}
+.rmark{view-transition-name:mark}
+
+::view-transition-group(team-title){animation-duration:var(--d-shot)}
+::view-transition-old(team-title){animation:sub-out var(--d-pass) var(--e-tick) both}
+::view-transition-new(team-title){animation:sub-in var(--d-shot) var(--e-net) both}
+@keyframes sub-out{to{opacity:0;transform:translateY(-.16em) skewX(-5deg)}}
+@keyframes sub-in{from{opacity:0;transform:translateY(.20em) skewX(5deg)}}
+
+/* a position indicator, not a body: it snaps */
+::view-transition-group(mark){animation-duration:var(--d-pass);animation-timing-function:var(--e-tick)}
 
 @media(prefers-reduced-motion:no-preference){
   .nav{transition:border-color .4s ease,background .4s ease}
-  .w{transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1)}
-  .pl::before,.pillar::before{transition:opacity .35s ease}
-  .row::after{transition:transform .3s cubic-bezier(.16,1,.3,1)}
+  .pillar::before{transition:opacity .35s ease}
+  .row::after{transition:transform var(--d-pass) var(--e-read)}
+  .row::before{transition:transform var(--d-pass) var(--e-read)}
+  .row .pill{transition:color var(--d-pass) 90ms var(--e-read)}
 }
 @media(prefers-reduced-motion:reduce){
-  .w{opacity:1;transform:none}
-  ::view-transition-old(root),::view-transition-new(root){animation:none}
+  ::view-transition-group(team-title),::view-transition-group(mark){animation:none}
 }
+
+/* ============================================================
+   TWO GROUNDS
+   Void black carries data. Floor navy carries place. Alternating
+   them irregularly — black, black, floor, black, floor — is what
+   stops the page reading as one uninterrupted dark field.
+   ============================================================ */
+
+.sec.floor{background:var(--floor)}
+.sec.floor .pillar{background:var(--floor)}
+.sec.floor .cell{background:var(--floor)}
+/* Hairlines have to work harder on the lighter ground. */
+.sec.floor{--line:rgba(144,187,232,.24);--line-2:rgba(144,187,232,.42)}
+
+/* ============================================================
+   THE PLATE
+   One photograph, eventually. Until then the arc passes through a
+   floor-navy field with court geometry in it, which is a composition
+   rather than a hole where an image should be.
+   ============================================================ */
+
+.plate{position:relative;height:clamp(240px,34vw,420px);background:var(--floor);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden}
+.plate-media{position:absolute;inset:0;background-size:cover;background-position:center}
+/* The empty state: a half-court key drawn in hairline, off to one side. */
+.plate:not(.has-photo)::after{
+  content:'';position:absolute;left:12%;bottom:-96px;
+  width:min(320px,42vw);aspect-ratio:1;
+  border:1px solid var(--line-2);border-radius:50%;
+  opacity:.5;
+}
+.plate:not(.has-photo)::before{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--line-2);
+}
+.plate.has-photo .plate-media{filter:grayscale(1) contrast(1.12)}
+.plate-cap{position:absolute;left:0;right:0;bottom:22px;pointer-events:none}
+.plate-cap span{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--dim);
+}
+
+/* ============================================================
+   THE ARC SPINE
+   One shot, from the foot of the ladder to the rim above Join.
+   Fixed, behind everything, pointer-transparent.
+   ============================================================ */
+
+/* Sits above the page's opaque section grounds but below the sticky nav,
+   and screens rather than paints — so it reads as a tracking overlay laid
+   over the broadcast, not a line drawn across the text. */
+.arc{position:fixed;inset:0;z-index:55;pointer-events:none}
+.wrap{position:relative;z-index:1}
+.arc path{fill:none;stroke:var(--ion);stroke-width:1.25;vector-effect:non-scaling-stroke}
+.arc .arc-track{stroke:var(--peri);opacity:.13}
+.arc .arc-live{opacity:.34}
+.arc .arc-ball{fill:var(--ion);opacity:.9}
+.arc .arc-glow{fill:var(--ion);opacity:.14}
+@media(max-width:900px){
+  /* On a phone the arc would cross the whole reading column. Keep the
+     telemetry, drop the line to a whisper. */
+  .arc .arc-live{opacity:.2}
+  .arc .arc-track{opacity:.08}
+  .arc-read{display:none}
+}
+.arc-read{
+  position:fixed;top:0;left:calc(var(--rail) + 14px);will-change:transform;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--peri);
+  opacity:.55;pointer-events:none;z-index:2;
+}
+
+/* ============================================================
+   CONTENT THAT DOES NOT FIT
+   A coach pasting a bracket URL used to push the document to
+   3388px inside an overflow-hidden body, silently amputating it.
+   ============================================================ */
+
+.alert p,.alert small,.gym p,.gym b,.meta-v,.pl-n,.row-o,.row-v,.prow>div,.proof-i span,.pillar p{overflow-wrap:anywhere}
+.prow,.prow>div{min-width:0}
+.meta,.meta>div{min-width:0}
+
+/* Empty grid tracks used to show the container colour as a slab. */
+.roster{background:transparent;gap:0}
+.pl{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+/* The marker sat on top of the label, striking through the active team.
+   It belongs on the spine. */
+.rmark{left:calc(50% - 26px)}
+.rung[aria-current="true"]::before{left:4px;right:4px}
+
+/* The mobile team strip scrolls; say so, the way the console does. */
+.mrail{-webkit-mask-image:linear-gradient(to right,#000 90%,transparent 100%);mask-image:linear-gradient(to right,#000 90%,transparent 100%)}
+
+/* Empty and unavailable states, in the site's voice rather than blank space. */
+.empty{
+  padding:34px 0;border-top:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  letter-spacing:.06em;color:var(--dim);line-height:1.9;
+}
+.nogame{padding:38px 36px}
+.nogame b{display:block;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 96,'wght' 800;font-size:var(--t3);text-transform:uppercase;font-weight:400;margin-bottom:10px}
+.nogame p{font-size:14px;color:var(--dim);line-height:1.7;max-width:420px}
+
+/* A schedule row reads like a broadcast scrub on hover. */
+.row::before{
+  content:'';position:absolute;inset:auto 0 0 0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--ion),transparent);
+  transform:scaleX(0);transform-origin:left;
+}
+.row:hover::before{transform:scaleX(1)}
+.row:hover .pill{color:var(--chalk)}
+
+/* ============================================================
+   PRINT
+   A parent printing the schedule for the fridge is the most
+   predictable thing anyone does with this page.
+   ============================================================ */
+
+@media print{
+  :root{--rail:0px}
+  .ladder,.mrail,.nav,.arc,.arc-read,.count,.stack,#join,#plate,.foot-edit,.ed,.skip{display:none!important}
+  html,body{background:#fff;color:#000}
+  .wrap{padding-left:0}
+  .inner{max-width:none;padding:0}
+  .sec,.sec.floor{background:#fff;padding:14pt 0;border-top:1px solid #999;break-inside:avoid}
+  .alerts{background:#fff;border-bottom:1px solid #999}
+  .h1,.sec-t,.pl-n,.row-o,.gym b{color:#000}
+  .claim,.row-d,.row-v,.pl-d,.proof-k,.meta-k,.alert small{color:#333}
+  .game,.cell,.pl,.pillar{background:#fff;border-color:#999}
+  .pl-no{display:none}
+  .row,.pl,.gym,.prow,.alert{break-inside:avoid}
+  #schedule,#roster{break-before:page}
+  .pill{box-shadow:none;border:1px solid #666;color:#000}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555}
+  @page{margin:14mm}
+}
+
+/* the shot clock — see site.js shotClock() */
+.game{position:relative}
+.game::before{
+  content:'';position:absolute;inset:0 0 auto 0;height:1px;z-index:2;
+  background:var(--ion);transform-origin:left;transform:scaleX(var(--sc,1));
+}
+@media(prefers-reduced-motion:no-preference){
+  .game::before{transition:transform 1000ms linear}
+  /* the reset is an instrument snapping back, not a body easing */
+  .game.reset::before{transition:transform 170ms steps(8,end)}
+}
+@media(prefers-reduced-motion:reduce){
+  .game::before{transform:scaleX(1)}
+}
+
+/* no fixture: the card says so instead of showing five em-dashes */
+.game.no-game .vs-x,.game.no-game .crest.opp{opacity:.35}
+.game.no-game .meta-v em{color:var(--dim)}
+
+/* the rim the arc arrives at, and the net taking the shot */
+.arc .arc-rim{stroke:var(--peri);stroke-width:1.5;opacity:.5}
+.arc .arc-board{stroke:var(--peri);stroke-width:1;opacity:.2}
+.arc .arc-ripple{fill:none;stroke:var(--ion);stroke-width:1.5;opacity:0}
+@media(prefers-reduced-motion:reduce){.arc .arc-ripple{display:none}}
+
+/* ambient shots — faint arcs launching behind the page at the team's make rate */
+.arc .arc-lane{stroke:none;fill:none}
+.arc .arc-shot{
+  fill:none;stroke:var(--ion);stroke-width:1.4;
+  stroke-linecap:round;opacity:.5;
+}
+.arc .arc-shots{opacity:.85}
+@media(prefers-reduced-motion:reduce){.arc .arc-shots{display:none}}
+
+/* a player checking in, rather than a cursor-following blob */
+.pl-no{transform:translateY(0)}
+.pl:hover .pl-no,.pl:focus-within .pl-no{color:rgba(248,10,144,.34);transform:translateY(-7px)}
+@media(prefers-reduced-motion:no-preference){
+  .pl-no{transition:color var(--d-shot) var(--e-read),transform var(--d-shot) var(--e-net)}
+}
+
+/* anything with a deadline on it reads as live */
+.alert-tag:not(.info){position:relative;padding-left:20px}
+.alert-tag:not(.info)::before{
+  content:'';position:absolute;left:9px;top:50%;
+  width:5px;height:5px;margin-top:-2.5px;border-radius:50%;
+  background:var(--ion);
+}
+@media(prefers-reduced-motion:no-preference){
+  .alert-tag:not(.info)::before{animation:livedot 2.4s var(--e-read) infinite}
+}
+@keyframes livedot{
+  0%,72%,100%{opacity:1;box-shadow:0 0 0 0 rgba(248,10,144,.5)}
+  36%{opacity:.55;box-shadow:0 0 0 5px rgba(248,10,144,0)}
+}
+
+/* the photo band has depth as you pass it */
+.plate-media{will-change:transform}
+
+/* scores flip like a scoreboard rather than snapping */
+.roll-cell{display:inline-block;white-space:pre}
+.roll-digit{display:inline-block}
+@media(prefers-reduced-motion:no-preference){
+  .roll-digit{animation:flip var(--d-shot) var(--e-read) both}
+}
+@keyframes flip{
+  from{opacity:0;transform:translateY(-.42em)}
+  to{opacity:1;transform:none}
+}
+
+/* the ball streaks when you scroll fast, settles when you stop */
+.arc .arc-tail{
+  fill:none;stroke:var(--ion);stroke-width:2.4;
+  stroke-linecap:round;opacity:0;
+}
+
+/* court-line wipes: a rule sweeps in from the left the way a baseline
+   is painted, rather than the usual underline fade */
+.nav-links a,.gym a,.pillar a{position:relative}
+.nav-links a::after,.gym a::after,.pillar a::after{
+  content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;
+  background:var(--ion);transform:scaleX(0);transform-origin:left;
+}
+.nav-links a:hover::after,.nav-links a:focus-visible::after,
+.gym a:hover::after,.pillar a:hover::after{transform:scaleX(1)}
+@media(prefers-reduced-motion:no-preference){
+  .nav-links a::after,.gym a::after,.pillar a::after{
+    transition:transform var(--d-pass) var(--e-read);
+  }
+}
+
+/* the primary button fills from the notched corner on hover */
+.btn{position:relative;overflow:hidden;isolation:isolate}
+.btn::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:var(--chalk);transform:scaleX(0);transform-origin:left;
+}
+.btn:hover::before{transform:scaleX(1)}
+.btn.ghost::before{background:rgba(144,187,232,.14)}
+@media(prefers-reduced-motion:no-preference){
+  .btn::before{transition:transform var(--d-shot) var(--e-read)}
+}
+
+/* the opponent badge turns over when a new team takes the floor */
+.crest{transform-style:preserve-3d;backface-visibility:hidden}
+
+/* form fields get a baseline swept under them on focus */
+.field{position:relative}
+.field input,.field select,.field textarea{position:relative;z-index:1}
+.field::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:var(--ion);transform:scaleX(0);transform-origin:left;
+}
+.field:focus-within::after{transform:scaleX(1)}
+@media(prefers-reduced-motion:no-preference){
+  .field::after{transition:transform var(--d-shot) var(--e-read)}
+}
+
+/* the photo band breathes as it passes */
+
+
+/* ============================================================
+   THE GYM IN THE BACKGROUND
+   Shots fly continuously at the same rim the spine arrives at.
+   Masked so they fade out over the left column, where the reading
+   happens, and stay strongest over the open right-hand space.
+   ============================================================ */
+
+.shotfx{
+  position:absolute;top:0;right:0;height:100%;width:66%;
+  z-index:1;pointer-events:none;
+}
+@media(max-width:900px){
+  .shotfx{width:100%;opacity:.62}
+}
+
+@media(prefers-reduced-motion:reduce){ .shotfx{display:none} }

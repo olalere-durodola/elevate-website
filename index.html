@@ -10,11 +10,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,300..900&family=Sora:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
-<link rel="stylesheet" href="assets/console.css">
+<meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Elevate Basketball — Prosper, TX">
+<meta property="og:description" content="Schedules, rosters, practice times and tryouts. 5th grade through varsity.">
+<meta property="og:image" content="assets/logo.jpg">
+<meta name="twitter:card" content="summary">
 </head>
 <body>
 
-<nav class="ladder" aria-label="Program teams">
+<a class="skip" href="#main">Skip to the schedule</a>
+<p id="live" class="sr-only" role="status" aria-live="polite"></p>
+
+<nav class="ladder" aria-label="Choose a team">
   <div class="ladder-cap" id="ladderTop">&nbsp;</div>
   <div class="rungs" id="rungs"><div class="spine"></div><div class="rmark" id="rmark"></div></div>
   <div class="ladder-foot" id="ladderFoot">&nbsp;</div>
@@ -22,9 +30,9 @@
 
 <div class="wrap" id="wrap">
 
-<div class="nav">
+<nav class="nav" aria-label="Sections">
   <div class="inner nav-in">
-    <a href="#top"><img class="logo" src="assets/logo.jpg" alt="Elevate Basketball"></a>
+    <a href="#top"><img class="logo" src="assets/logo.jpg" width="440" height="207" alt="Elevate Basketball"></a>
     <div class="nav-links">
       <a href="#game">Next game</a>
       <a href="#schedule">Schedule</a>
@@ -35,33 +43,47 @@
     </div>
     <a href="#join" class="btn">Request tryout</a>
   </div>
-</div>
+</nav>
 
-<div class="mrail" aria-label="Program teams"><div class="mrail-in" id="mrungs"></div></div>
+<div class="mrail" role="group" aria-label="Choose a team"><div class="mrail-in" id="mrungs"></div></div>
 
-<section class="alerts" id="alerts" hidden>
-  <div class="inner" id="alertBody"></div>
+<!-- Above-fold content is written out here as well as rendered by JS.
+     Shipping it empty and filling it after first paint was the whole of
+     the page's layout shift; the seed values are the same ones site.js
+     would draw a moment later, so nothing moves. -->
+<section class="alerts" id="alerts" aria-label="Announcements">
+  <div class="inner" id="alertBody">
+    <div class="alert">
+      <div class="alert-tag">Action</div>
+      <div><p>Tournament fees are due Friday. $45 per player, Venmo or check to Coach Zae.</p><small>Posted Aug 4 · All teams</small></div>
+    </div>
+    <div class="alert">
+      <div class="alert-tag info">Update</div>
+      <div><p>Thursday practice moved to Court 2. Same time, enter through the east doors.</p><small>Posted Aug 5 · 7th grade</small></div>
+    </div>
+  </div>
 </section>
 
 <header class="head" id="top">
-  <canvas id="arcfx" aria-hidden="true"></canvas>
   <div class="inner">
-    <div class="eyebrow" id="eyebrowLine">&nbsp;</div>
-    <h1 class="h1" id="teamTitle">&nbsp;</h1>
-    <p class="claim" id="claim">&nbsp;</p>
+    <div class="eyebrow" id="eyebrowLine">Elevate Basketball / Prosper, TX</div>
+    <h1 class="h1" id="teamTitle">7th grade</h1>
+    <p class="claim" id="claim">Most programs count wins.<br><b>We count who's still playing in four years.</b></p>
     <div class="cutline"></div>
     <div class="subline">
       <div>Record <b id="mRec">&mdash;</b></div>
       <div>Coach <b id="mCoach">&mdash;</b></div>
       <div>Home gym <b id="mGym">&mdash;</b></div>
     </div>
-    <a href="#game" class="cue">Scroll<span></span></a>
   </div>
 </header>
 
+<main id="main">
+
 <section class="sec" id="game" style="border-top:none;padding-top:0">
   <div class="inner">
-    <div class="game">
+    <h2 class="sr-only">Next game</h2>
+    <div class="game" id="gameCard">
       <div class="game-l">
         <div class="klabel">Next game</div>
         <div class="vs">
@@ -78,7 +100,7 @@
       </div>
       <div class="game-r">
         <div class="klabel" id="countLabel">Tip-off in</div>
-        <div class="count">
+        <div class="count" aria-hidden="true">
           <div class="cu"><b id="cd">--</b><span>Days</span></div>
           <div class="cu"><b id="ch">--</b><span>Hrs</span></div>
           <div class="cu"><b id="cm">--</b><span>Min</span></div>
@@ -95,14 +117,14 @@
 
 <section class="sec" id="schedule">
   <div class="inner">
-    <div class="sec-head"><div><span class="sec-n">01 / Season</span><h2 class="sec-t" id="schTitle">Schedule</h2></div></div>
+    <div class="sec-head"><div><span class="sec-n">Season</span><h2 class="sec-t" id="schTitle">Schedule</h2></div></div>
     <div id="schBody"></div>
   </div>
 </section>
 
-<section class="sec" id="week">
+<section class="sec floor" id="week">
   <div class="inner">
-    <div class="sec-head"><div><span class="sec-n">02 / Every week</span><h2 class="sec-t">Practice and gyms</h2></div></div>
+    <div class="sec-head"><div><span class="sec-n">Every week</span><h2 class="sec-t">Practice and gyms</h2></div></div>
     <div class="two">
       <div class="cell">
         <h3>Practice schedule</h3>
@@ -118,14 +140,21 @@
 
 <section class="sec" id="roster">
   <div class="inner">
-    <div class="sec-head"><div><span class="sec-n">03 / Team</span><h2 class="sec-t" id="rosTitle">Roster</h2></div></div>
+    <div class="sec-head"><div><span class="sec-n">Team</span><h2 class="sec-t" id="rosTitle">Roster</h2></div></div>
     <div class="roster" id="rosBody"></div>
   </div>
 </section>
 
-<section class="sec" id="program">
+<!-- The one photograph. Until there is one, the arc passes through an
+     empty floor-navy field, which is a composition rather than a gap. -->
+<section class="plate" id="plate" aria-hidden="true">
+  <div class="plate-media" id="plateMedia"></div>
+  <div class="inner plate-cap"><span id="plateLine"></span></div>
+</section>
+
+<section class="sec floor" id="program">
   <div class="inner">
-    <div class="sec-head"><div><span class="sec-n">04 / How it works</span><h2 class="sec-t" id="programTitle">Three years, three jobs</h2></div></div>
+    <div class="sec-head"><div><span class="sec-n">How it works</span><h2 class="sec-t" id="programTitle">Three years, three jobs</h2></div></div>
     <div class="pillars" id="pillarBody"></div>
     <div class="proof">
       <div class="proof-k" id="proofLabel"></div>
@@ -137,11 +166,11 @@
 
 <section class="sec" id="join">
   <div class="inner">
-    <div class="sec-head"><div><span class="sec-n">05 / Get in</span><h2 class="sec-t">Join the program</h2></div></div>
+    <div class="sec-head"><div><span class="sec-n">Get in</span><h2 class="sec-t">Join the program</h2></div></div>
 
     <div class="formwrap" id="formwrap">
       <p class="fintro" id="joinIntro"></p>
-      <div class="fgrid">
+      <form class="fgrid" id="joinForm" novalidate>
         <div class="field">
           <label for="f-name">Your name <b>*</b></label>
           <input id="f-name" type="text" autocomplete="name" placeholder="Parent or guardian">
@@ -187,28 +216,28 @@
           <label for="f-msg">Anything we should know</label>
           <textarea id="f-msg" placeholder="Experience, positions, schedule conflicts, questions."></textarea>
         </div>
-        <div class="trap"><label for="f-trap">Leave blank</label><input id="f-trap" type="text" tabindex="-1" autocomplete="off"></div>
-        <div class="consent">
-          <input id="f-consent" type="checkbox">
+        <div class="trap" aria-hidden="true"><label for="f-trap">Leave blank</label><input id="f-trap" type="text" tabindex="-1" autocomplete="off"></div>
+        <label class="consent" for="f-consent">
+          <input id="f-consent" type="checkbox" aria-describedby="m-consent">
           <span>I am the parent or legal guardian and I agree to be contacted by a coach about this request. <b id="m-consent" style="display:none;color:var(--ion);font-weight:400"> Required.</b></span>
-        </div>
+        </label>
         <div class="fsubmit">
-          <button class="btn" id="f-send" type="button">Send request</button>
-          <span class="fnote" id="f-note">Usually answered in 2 days</span>
+          <button class="btn" id="f-send" type="submit">Send request</button>
+          <span class="fnote" id="f-note">Answered within two days</span>
         </div>
-      </div>
+      </form>
     </div>
 
-    <div class="sent" id="sent">
+    <div class="sent" id="sent" tabindex="-1">
       <h3>Request sent</h3>
-      <p>A coach will reach out at the email you gave us. If it's urgent, text the program director at the number in the contact section below.</p>
+      <p id="sentBody"></p>
     </div>
   </div>
 </section>
 
 <section class="sec" id="contact">
   <div class="inner">
-    <div class="sec-head"><div><span class="sec-n">06 / Questions</span><h2 class="sec-t">Contact</h2></div></div>
+    <div class="sec-head"><div><span class="sec-n">Questions</span><h2 class="sec-t">Contact</h2></div></div>
     <div class="two">
       <div class="cell">
         <h3>Team coach</h3>
@@ -224,6 +253,8 @@
   </div>
 </section>
 
+</main>
+
 <footer class="inner foot">
   <img class="logo sm" src="assets/logo.jpg" alt="Elevate Basketball">
   <small id="footNote"></small>
@@ -236,8 +267,49 @@
 <script src="assets/seed.js"></script>
 <script src="assets/backend.js"></script>
 <script src="assets/site.js"></script>
-<script src="assets/hero.js"></script>
+<script src="assets/arc.js"></script>
+<script src="assets/shots.js"></script>
 <script src="assets/form.js"></script>
-<script src="assets/console.js"></script>
+
+<!-- The edit console is coach-only. It was 43KB on every parent's phone
+     for a screen 99% of visitors never open, so it now loads on demand:
+     when the URL asks for it, when a coach taps sign-in, or when a
+     sign-in link comes back from email. -->
+<script>
+(function () {
+  var loading = false;
+  function loadConsole(cb) {
+    if (loading) return;
+    loading = true;
+    var css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "assets/console.css";
+    document.head.appendChild(css);
+    var js = document.createElement("script");
+    js.src = "assets/console.js";
+    js.onload = function () { if (cb) cb(); };
+    document.body.appendChild(js);
+  }
+  window.loadConsole = loadConsole;
+
+  var wanted = /(^|[?&])edit(=|&|$)/.test(location.search) ||
+               location.hash.indexOf("access_token") !== -1 ||
+               location.hash.indexOf("error") !== -1;
+  if (wanted) loadConsole();
+
+  var entry = document.getElementById("coachEntry");
+  if (entry) {
+    entry.addEventListener("click", function () {
+      loadConsole(function () { if (window.EditConsole) window.EditConsole.open(); });
+    });
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key && e.key.toLowerCase() === "e" && e.ctrlKey && e.shiftKey) {
+      e.preventDefault();
+      loadConsole(function () { if (window.EditConsole) window.EditConsole.open(); });
+    }
+  });
+})();
+</script>
 </body>
 </html>
