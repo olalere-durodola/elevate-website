@@ -29,14 +29,14 @@ var SEED_SITE = {
     { name: "McKinney Sports Center", address: "2400 Wilson Creek Pkwy, McKinney, TX 75069", note: "Court 4, upstairs" }
   ],
 
-  programTitle: "Three years, three jobs",
+  programTitle: "Three stages, three jobs",
   pillars: [
-    { label: "5th – 6th grade", title: "Develop", body: "Footwork, both hands, and a shot that survives contact. Everyone plays real minutes. We do not run a bench at this level, and we do not chase trophies with a six-man rotation.", linkText: "Explore development" },
-    { label: "7th – 8th grade", title: "Compete", body: "Tournament schedule, scouting reports, and film every week. Minutes are earned here, and players learn to handle that before high school does it to them.", linkText: "Explore competition" },
-    { label: "JV – Varsity", title: "Advance", body: "Strength work, position-specific coaching, and honest conversations about where each player fits at the next level. We prepare for the school program, not around it.", linkText: "Explore advancement" }
+    { label: "5th – 6th grade", title: "Develop", body: "Footwork, both hands, and a shot that survives contact. Everyone plays real minutes. We do not run a bench at this level, and we do not chase trophies with a six-man rotation.", linkText: "Ask about a 5th–6th spot" },
+    { label: "7th – 8th grade", title: "Compete", body: "Tournament schedule, scouting reports, and film every week. Minutes are earned here, and players learn to handle that before high school does it to them.", linkText: "Ask about a 7th–8th spot" },
+    { label: "JV – Varsity", title: "Advance", body: "Strength work, position-specific coaching, and honest conversations about where each player fits at the next level. We prepare for the school program, not around it.", linkText: "Ask about JV and varsity" }
   ],
 
-  proofLabel: "What that has produced — replace with your real numbers",
+  proofLabel: "What three seasons have produced",
   stats: [
     { value: 31, suffix: "", label: "Players who made their high school roster in the last three seasons" },
     { value: 86, suffix: "%", label: "Of players who start with us at 5th grade are still playing in 9th" },
@@ -44,6 +44,14 @@ var SEED_SITE = {
   ],
   /* Wrap a phrase in *asterisks* to make it stand out. */
   proofNote: "Coaching staff has come through *Prosper HS*, *Texas A&M-Commerce*, and *Dallas Showtyme*. Alumni now play at *Prosper*, *Rock Hill*, *Walnut Grove*, and *Celina*.",
+
+  /* Shown after a request is sent. Never point at a channel that
+     does not exist — there is no phone number anywhere on this site. */
+  sentBody: "Coach Reyes will email you at the address you gave us, within two days. If you have not heard by then, reply to that address and we will chase it.",
+
+  /* Caption under the photo band. Leave photo empty until you have one. */
+  photo: "",
+  plateLine: "Prosper Fieldhouse · 6:45 AM",
 
   joinIntro: "Tryouts run twice a year, and we carry a short waitlist between them. Tell us about your player and a coach will follow up within two days. Parents and guardians only, please.",
 

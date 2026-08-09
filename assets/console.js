@@ -71,6 +71,13 @@
     control.addEventListener("input", function () {
       var value = control.value;
       if (opts.number) value = value === "" ? "" : Number(value);
+      /* A validating field decides for itself whether to commit. Writing
+         first and checking afterwards let a duplicate team id land in
+         state and then reported the error it had failed to prevent. */
+      if (opts.validate) {
+        if (opts.validate(value, control)) touch();
+        return;
+      }
       obj[key] = value;
       touch();
       if (opts.onchange) opts.onchange(value);
@@ -96,6 +103,9 @@
       paint();
     }
 
+    /* Re-rendering the list destroys the button that was just pressed, so
+       focus has to be put back deliberately — otherwise reordering by
+       keyboard is a one-shot operation. */
     function move(from, to) {
       if (to < 0 || to >= items.length) return;
       var moved = items.splice(from, 1)[0];
@@ -103,6 +113,14 @@
       touch();
       redrawPage();
       rerender();
+      var row = wrap.querySelectorAll(".ed-item")[to];
+      if (!row) return;
+      var buttons = row.querySelectorAll(".ed-nudge");
+      var wanted = to < from ? buttons[0] : buttons[1];
+      if (wanted && !wanted.disabled) wanted.focus();
+      else if (buttons[0] && !buttons[0].disabled) buttons[0].focus();
+      else if (buttons[1] && !buttons[1].disabled) buttons[1].focus();
+      row.scrollIntoView({ block: "nearest" });
     }
 
     function paint() {
@@ -129,6 +147,7 @@
           class: "ed-del", type: "button",
           title: "Remove", "aria-label": opts.removeLabel || "Remove",
           onclick: function () {
+            if (opts.confirm && !confirm(opts.confirm(item))) return;
             items.splice(i, 1);
             if (opts.onremove) opts.onremove(item);
             touch();
@@ -217,7 +236,9 @@
     body.scrollTop = 0;
 
     root.querySelectorAll(".ed-tab").forEach(function (b) {
-      b.setAttribute("aria-selected", b.dataset.tab === state.tab ? "true" : "false");
+      var on = b.dataset.tab === state.tab;
+      b.setAttribute("aria-selected", on ? "true" : "false");
+      b.setAttribute("tabindex", on ? "0" : "-1");
     });
 
     var picker = root.querySelector(".ed-pick");
@@ -240,9 +261,10 @@
     return h("div", {}, [
       group("This team", null, [
         field("Team name", t, "name", { placeholder: "7th grade" }),
-        field("Rail label", t, "id", {
+        field("Short tag", t, "id", {
           placeholder: "7th",
-          onchange: function (value) { renameTeam(t, value); }
+          maxlength: "5",
+          validate: function (value) { return renameTeam(t, value); }
         }),
         h("div", { class: "ed-pair" }, [
           field("Record", t, "record", { placeholder: "18-4" }),
@@ -341,6 +363,7 @@
           add: "Add a player",
           empty: "No players on this roster yet.",
           removeLabel: "Remove player",
+          confirm: function (p) { return "Remove " + (p.name || "this player") + " from the roster?"; },
           blank: function () {
             return { number: "", position: "Guard", name: "", height: "", grade: t.id || "" };
           }
@@ -557,18 +580,22 @@
     return id;
   }
 
+  /* Returns true only if the value was actually committed. */
   function renameTeam(t, value) {
     var next = String(value || "").trim();
-    if (!next) return;                       /* wait until they finish typing */
-    if (t._originalId === undefined) t._originalId = t.id;
+    if (!next) { say("Every team needs a short tag.", "warn"); return false; }
+
     var clash = Site.state.teams.some(function (o) { return o !== t && o.id === next; });
     if (clash) {
-      say("Another team already uses the label " + next + ".", "warn");
-      return;
+      say("Another team already uses the tag " + next + ".", "warn");
+      return false;
     }
+
+    if (t._originalId === undefined) t._originalId = t.id;
     t.id = next;
     say("");
     redrawPage();
+    return true;
   }
 
   function addTeam() {
@@ -742,7 +769,7 @@
     ]);
     root.appendChild(head);
 
-    var body = h("div", { class: "ed-body" });
+    var body = h("div", { class: "ed-body", id: "ed-panel", role: "tabpanel", tabindex: "-1" });
 
     if (!Backend.configured && !state.preview) {
       body.appendChild(setupNotice());
@@ -755,12 +782,29 @@
       return;
     }
 
-    var tabs = h("div", { class: "ed-tabs", role: "tablist" });
+    /* Proper tab semantics: roving tabindex, arrow keys, and a panel that
+       actually exists for a screen reader to move into. */
+    var tabs = h("div", { class: "ed-tabs", role: "tablist", "aria-label": "What to edit" });
     TABS.forEach(function (t) {
+      var selected = t.id === state.tab;
       var button = h("button", {
         class: "ed-tab", type: "button", role: "tab",
-        "aria-selected": t.id === state.tab ? "true" : "false",
-        onclick: function () { state.tab = t.id; paintTab(); }
+        id: "ed-tab-" + t.id,
+        "aria-controls": "ed-panel",
+        "aria-selected": selected ? "true" : "false",
+        tabindex: selected ? "0" : "-1",
+        onclick: function () { state.tab = t.id; paintTab(); },
+        onkeydown: function (e) {
+          var i = TABS.map(function (x) { return x.id; }).indexOf(state.tab);
+          var next = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+                   : e.key === "Home" ? 0 : e.key === "End" ? TABS.length - 1 : -1;
+          if (next < 0 && e.key !== "Home") return;
+          e.preventDefault();
+          state.tab = TABS[(next + TABS.length) % TABS.length].id;
+          paintTab();
+          var moved = root.querySelector("#ed-tab-" + state.tab);
+          if (moved) moved.focus();
+        }
       }, [t.label]);
       button.dataset.tab = t.id;
       tabs.appendChild(button);
@@ -838,16 +882,15 @@
       state.gateTone = "warn";
     }
 
+    /* The loader in index.html decides when this file is fetched at all;
+       it only opens on its own if the URL asked for the console. */
     var wanted = /(^|[?&])edit(=|&|$)/.test(location.search) || arrived || !!failure;
     if (wanted) open();
 
-    var entry = document.getElementById("coachEntry");
-    if (entry) entry.addEventListener("click", open);
-
     document.addEventListener("keydown", function (e) {
-      if (e.key && e.key.toLowerCase() === "e" && e.ctrlKey && e.shiftKey) {
+      if (e.key === "Escape" && state.open) {
         e.preventDefault();
-        state.open ? close() : open();
+        close();
       }
     });
 
@@ -859,4 +902,11 @@
   }
 
   boot();
+
+  /* The lazy loader calls this once the file lands. */
+  window.EditConsole = {
+    open: function () { state.open ? null : open(); },
+    close: close,
+    isOpen: function () { return state.open; }
+  };
 })();
