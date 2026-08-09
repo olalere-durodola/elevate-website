@@ -256,8 +256,7 @@ a{color:inherit}
   .rmark{transition:top var(--d-pass) var(--e-tick),opacity var(--d-pass)}
   .nav-in>*{transition:transform var(--d-pass) var(--e-read)}
   .pillar a i,.gym a i{transition:transform var(--d-pass) var(--e-release)}
-  }
-50%{transform:scaleY(1);opacity:1}}
+}
 
 .head{position:relative;overflow:hidden;min-height:520px}
 .head .inner{position:relative;z-index:2}
@@ -598,3 +597,20 @@ html.switching{view-transition-name:none}
 
 /* the photo band breathes as it passes */
 
+
+/* ============================================================
+   THE GYM IN THE BACKGROUND
+   Shots fly continuously at the same rim the spine arrives at.
+   Masked so they fade out over the left column, where the reading
+   happens, and stay strongest over the open right-hand space.
+   ============================================================ */
+
+.shotfx{
+  position:absolute;top:0;right:0;height:100%;width:66%;
+  z-index:1;pointer-events:none;
+}
+@media(max-width:900px){
+  .shotfx{width:100%;opacity:.62}
+}
+
+@media(prefers-reduced-motion:reduce){ .shotfx{display:none} }

@@ -192,21 +192,6 @@
     });
   }
 
-  function startAmbient() {
-    if (REDUCED) return;
-    stopAmbient();
-    var loop = function () {
-      /* Only spend frames while the hero is actually on screen. */
-      if (window.scrollY < window.innerHeight * 1.4 && !document.hidden) fireShot();
-      ambientTimer = setTimeout(loop, 3400 + Math.random() * 2600);
-    };
-    ambientTimer = setTimeout(loop, 2600);
-  }
-
-  function stopAmbient() {
-    if (ambientTimer) clearTimeout(ambientTimer);
-    ambientTimer = null;
-  }
 
   /* The parabola is defined in viewport coordinates and redrawn on resize.
      Release sits at the rail, apex over the top third, arrival at the rim
@@ -365,11 +350,6 @@
       setTimeout(function () { fireShot({ make: true, duration: 1080, strong: true }); }, 420);
     }
 
-    startAmbient();
-    document.addEventListener("visibilitychange", function () {
-      document.hidden ? stopAmbient() : startAmbient();
-    });
-
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", function () { shape(); draw(); }, { passive: true });
   }
@@ -377,7 +357,7 @@
   /* A team switch re-seeds the background: the next shots you see are
      the new team's shooting. Nobody consciously notices. It is why it
      feels true. */
-  window.ArcSpine = { shoot: fireShot };
+  window.ArcSpine = { shoot: fireShot, ripple: netRipple };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);
