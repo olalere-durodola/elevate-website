@@ -22,7 +22,8 @@
   var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var NS = "http://www.w3.org/2000/svg";
 
-  var svg, track, live, ball, glow, path, rim, board, ripple;
+  var svg, track, live, ball, glow, path, rim, board, ripple, tail;
+  var lastP = 0, tailLen = 0;
   var made = false;
   var readouts = [];
   var pending = false;
@@ -67,6 +68,9 @@
     ripple.setAttribute("class", "arc-ripple");
     ripple.setAttribute("r", "0");
 
+    tail = document.createElementNS(NS, "path");
+    tail.setAttribute("class", "arc-tail");
+
     glow = document.createElementNS(NS, "circle");
     glow.setAttribute("class", "arc-glow");
     glow.setAttribute("r", "11");
@@ -93,6 +97,7 @@
     svg.appendChild(board);
     svg.appendChild(rim);
     svg.appendChild(ripple);
+    svg.appendChild(tail);
     svg.appendChild(glow);
     svg.appendChild(ball);
     document.body.insertBefore(svg, document.body.firstChild);
@@ -225,6 +230,7 @@
     var d = "M" + x0 + "," + y0 + " Q" + cx + "," + cy + " " + x2 + "," + y2;
     track.setAttribute("d", d);
     live.setAttribute("d", d);
+    tail.setAttribute("d", d);
 
     lanes.forEach(function (lane, i) {
       lane.el.setAttribute("d", laneShape(i, w, h, rail));
@@ -263,6 +269,25 @@
     glow.setAttribute("cx", pt.x);
     glow.setAttribute("cy", pt.y);
 
+    /* Scroll fast and the ball streaks; stop and it settles.
+       The tail is a dashed segment of the trajectory itself rather than a
+       recomputed path — two style writes a frame instead of three
+       getPointAtLength calls, which is the difference between 35fps and
+       60fps on a throttled phone. */
+    var speed = Math.abs(p - lastP);
+    lastP = p;
+    tailLen = tailLen * 0.72 + Math.min(speed * 5200, 190) * 0.28;
+
+    if (tailLen > 2) {
+      var travelled = total * p;
+      var len = Math.min(tailLen, travelled);
+      tail.style.strokeDasharray = len + " " + total;
+      tail.style.strokeDashoffset = -(travelled - len);
+      tail.style.opacity = String(Math.min(0.72, tailLen / 190));
+    } else if (tail.style.opacity !== "0") {
+      tail.style.opacity = "0";
+    }
+
     /* Telemetry: flight time and normalised altitude at this point on the
        path. Both fall out of the geometry — nothing here is decorative text. */
     var t = (p * 1.7).toFixed(2);
@@ -273,14 +298,21 @@
     if (p > 0.985 && !made) { made = true; netRipple(1); }
     else if (p < 0.94) { made = false; }
 
-    readouts.forEach(function (r) {
+    var reading = "T+" + t + "s · ALT " + alt.toFixed(2) + " · ";
+    for (var i = 0; i < readouts.length; i++) {
+      var r = readouts[i];
       var box = r.section.getBoundingClientRect();
       var onScreen = box.top < window.innerHeight * 0.7 && box.bottom > 0;
-      r.node.style.opacity = onScreen ? "" : "0";
-      if (!onScreen) return;
-      r.node.style.top = Math.max(78, Math.min(window.innerHeight - 30, box.top + 18)) + "px";
-      r.node.textContent = "T+" + t + "s · ALT " + alt.toFixed(2) + " · " + r.label;
-    });
+      if (onScreen !== r.shown) {
+        r.node.style.opacity = onScreen ? "" : "0";
+        r.shown = onScreen;
+      }
+      if (!onScreen) continue;
+      var y = Math.max(78, Math.min(window.innerHeight - 30, box.top + 18));
+      if (y !== r.y) { r.node.style.transform = "translateY(" + y + "px)"; r.y = y; }
+      var text = reading + r.label;
+      if (text !== r.text) { r.node.textContent = text; r.text = text; }
+    }
   }
 
   function onScroll() {
@@ -297,7 +329,7 @@
       node.className = "arc-read";
       node.setAttribute("aria-hidden", "true");
       document.body.appendChild(node);
-      readouts.push({ section: section, node: node, label: stop.label.toUpperCase() });
+      readouts.push({ section: section, node: node, label: stop.label.toUpperCase(), y: -1, text: "", shown: null });
     });
   }
 

@@ -275,7 +275,18 @@ var Site = (function () {
     roll("gUs", (t.record || "") + " · " + t.name);
     setText("gOpp", hasGame ? g.opponent : "Not scheduled");
     roll("gOppR", g.opponentRecord);
-    setText("oCrest", hasGame ? initials(g.opponent) : "--");
+    var crest = el("oCrest");
+    var nextCrest = hasGame ? initials(g.opponent) : "--";
+    if (crest && crest.textContent !== nextCrest && !REDUCED) {
+      /* a new opponent takes the floor: the badge turns over */
+      crest.animate(
+        [{ transform: "rotateY(0deg)" }, { transform: "rotateY(90deg)" }, { transform: "rotateY(0deg)" }],
+        { duration: 420, easing: "cubic-bezier(.2,0,0,1)" }
+      );
+      setTimeout(function () { crest.textContent = nextCrest; }, 190);
+    } else {
+      setText("oCrest", nextCrest);
+    }
     setText("gTime", g.tipoff ? longDate(g.tipoff) : "Goes up as soon as the bracket lands");
     setText("gArrive", g.arriveBy);
     setText("gVenue", g.venue);
@@ -541,6 +552,46 @@ var Site = (function () {
     document.querySelectorAll("[data-count]").forEach(function (n) { countIO.observe(n); });
   }
 
+  /* Schedule rows print in the way a box score comes off a printer:
+     the date first, then the opponent, then the result lands. */
+  function printSchedule() {
+    var body = el("schBody");
+    if (!body || REDUCED) return;
+    [].slice.call(body.children).forEach(function (row, i) {
+      var base = Math.min(i, 12) * 58;
+      row.animate([{ opacity: 0 }, { opacity: 1 }],
+        { duration: 200, delay: base, easing: "linear", fill: "backwards" });
+      [".row-d", ".row-o", ".row-v"].forEach(function (sel, n) {
+        var cell = row.querySelector(sel);
+        if (!cell) return;
+        cell.animate([{ opacity: 0, transform: "translateX(-6px)" }, { opacity: 1, transform: "none" }],
+          { duration: 240, delay: base + n * 48, easing: "cubic-bezier(.2,0,0,1)", fill: "backwards" });
+      });
+      var pill = row.querySelector(".pill");
+      if (pill) {
+        pill.animate([{ opacity: 0, transform: "scale(.86)" }, { opacity: 1, transform: "none" }],
+          { duration: 300, delay: base + 190, easing: "cubic-bezier(.2,1.24,.34,1)", fill: "backwards" });
+      }
+    });
+  }
+
+  /* Each of these fires once, when its section first comes into view. */
+  function armSectionEntrances() {
+    if (REDUCED) return;
+    var once = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        once.unobserve(e.target);
+        if (e.target.id === "roster") announceRoster();
+        if (e.target.id === "schedule") printSchedule();
+      });
+    }, { threshold: 0.15 });
+    ["roster", "schedule"].forEach(function (id) {
+      var node = el(id);
+      if (node) once.observe(node);
+    });
+  }
+
   function moveMark(i) {
     var rung = document.querySelectorAll(".rung")[i], mark = el("rmark");
     if (!rung || !mark) return;
@@ -588,6 +639,91 @@ var Site = (function () {
   /* ---------- boot ---------- */
 
 
+  /* ---------- the opening sequence ----------
+     One conductor rather than eleven independent animations firing on
+     their own clocks. Everything below is on a single timeline measured
+     from first paint, in the order a game starts: the ladder fills from
+     the youngest team up, the program names itself, the headline wipes
+     in like a scoreboard, and the card takes the floor. */
+
+  function conduct() {
+    var cue = function (node, keyframes, ms, delay, easing) {
+      if (!node) return;
+      if (REDUCED) return;
+      node.animate(keyframes, {
+        duration: ms, delay: delay, fill: "backwards",
+        easing: easing || "cubic-bezier(.2,0,0,1)"
+      });
+    };
+
+    /* the rail fills bottom-up: 5th grade first, varsity last */
+    var rungs = [].slice.call(document.querySelectorAll(".rung"));
+    rungs.forEach(function (r, i) {
+      cue(r, [{ opacity: 0, transform: "translateX(-10px)" }, { opacity: 1, transform: "none" }],
+          320, 120 + i * 60);
+    });
+    cue(el("ladderTop"), [{ opacity: 0 }, { opacity: 1 }], 300, 120 + rungs.length * 60);
+    cue(el("ladderFoot"), [{ opacity: 0 }, { opacity: 1 }], 300, 160);
+
+    cue(el("eyebrowLine"), [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], 420, 180);
+
+    /* the headline wipes in the way a scoreboard fills, left to right */
+    cue(el("teamTitle"),
+        [{ clipPath: "inset(0 100% 0 0)", opacity: 1 }, { clipPath: "inset(0 0 0 0)", opacity: 1 }],
+        760, 300, "cubic-bezier(.2,0,0,1)");
+
+    cue(el("claim"), [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], 520, 620);
+
+    var cutline = document.querySelector(".cutline");
+    cue(cutline, [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], 720, 740, "cubic-bezier(.2,0,0,1)");
+    if (cutline) cutline.style.transformOrigin = "left";
+
+    [].slice.call(document.querySelectorAll(".subline > div")).forEach(function (n, i) {
+      cue(n, [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], 380, 860 + i * 70);
+    });
+
+    /* the card takes the floor last */
+    cue(el("gameCard"), [{ opacity: 0, transform: "translateY(22px)" }, { opacity: 1, transform: "none" }],
+        620, 1000, "cubic-bezier(.2,1.24,.34,1)");
+  }
+
+  /* ---------- starting five ----------
+     When the roster scrolls into view the cards are announced one at a
+     time, and each jersey numeral counts up to itself. */
+
+  function announceRoster() {
+    var body = el("rosBody");
+    if (!body || REDUCED) return;
+    [].slice.call(body.children).forEach(function (card, i) {
+      card.animate(
+        [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }],
+        { duration: 300, delay: Math.min(i, 12) * 62, easing: "cubic-bezier(.2,1.24,.34,1)", fill: "backwards" }
+      );
+      var numeral = card.querySelector(".pl-no");
+      if (numeral) spinNumeral(numeral, Math.min(i, 12) * 62 + 90);
+    });
+  }
+
+  /* Rolls a jersey numeral up to its value, keeping the digit count fixed
+     so the card never reflows while it counts. */
+  function spinNumeral(node, delay) {
+    var target = parseInt(node.textContent, 10);
+    if (isNaN(target)) return;
+    var width = node.textContent.length;
+    var started = null, duration = 520;
+    setTimeout(function () {
+      function frame(ts) {
+        if (started === null) started = ts;
+        var p = Math.min((ts - started) / duration, 1);
+        var value = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        node.textContent = String(value).padStart(width, "0");
+        if (p < 1) requestAnimationFrame(frame);
+        else node.textContent = String(target).padStart(width, "0");
+      }
+      requestAnimationFrame(frame);
+    }, delay);
+  }
+
   function holdFonts() {
     var root = document.documentElement;
     root.classList.add("fonts-loading");
@@ -596,36 +732,41 @@ var Site = (function () {
     setTimeout(clear, 1600);
   }
 
-  function trackNav() {
-    var nav = document.querySelector(".nav"), ticking = false;
-    window.addEventListener("scroll", function () {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function () {
-        nav.classList.toggle("tight", window.scrollY > 140);
-        ticking = false;
-      });
-    }, { passive: true });
-  }
+  /* ---------- one scroll handler ----------
+     The nav condense and the photo parallax used to own a rAF loop each,
+     on top of the arc's. Three callbacks a frame is three chances to miss
+     one; this is a single read followed by a single write. */
 
-  /* The one photograph on the page drifts as you pass it, so it has
-     depth instead of sitting flat in the scroll. */
-  function trackPlate() {
+  function trackScroll() {
+    var nav = document.querySelector(".nav");
     var plate = el("plate"), media = el("plateMedia");
-    if (!plate || !media || REDUCED) return;
+    var parallax = plate && media && !REDUCED;
     var pending = false;
+
+    function frame() {
+      pending = false;
+      var y = window.scrollY;
+
+      if (nav) nav.classList.toggle("tight", y > 140);
+
+      if (parallax) {
+        var box = plate.getBoundingClientRect();
+        if (box.bottom > 0 && box.top < window.innerHeight) {
+          var seen = 1 - (box.top + box.height) / (window.innerHeight + box.height);
+          media.style.transform = "translate3d(0," + ((seen - 0.5) * 46).toFixed(1) + "px,0) scale(1.14)";
+        }
+      }
+    }
+
     window.addEventListener("scroll", function () {
       if (pending) return;
       pending = true;
-      requestAnimationFrame(function () {
-        pending = false;
-        var box = plate.getBoundingClientRect();
-        if (box.bottom < 0 || box.top > window.innerHeight) return;
-        var seen = 1 - (box.top + box.height) / (window.innerHeight + box.height);
-        media.style.transform = "translate3d(0," + ((seen - 0.5) * 46).toFixed(1) + "px,0) scale(1.14)";
-      });
+      requestAnimationFrame(frame);
     }, { passive: true });
+
+    frame();
   }
+
 
   function trackPointerGlow() {
     if (REDUCED || !window.matchMedia("(hover:hover)").matches) return;
@@ -673,10 +814,7 @@ var Site = (function () {
     holdFonts();
     render(false);
 
-    reveal([el("eyebrowLine"), el("teamTitle")].filter(Boolean), 90);
-    reveal(document.querySelectorAll(".claim"), 0);
-    reveal(document.querySelectorAll(".cutline"), 0, "draw");
-    reveal(document.querySelectorAll(".subline"), 110);
+    conduct();
 
     watch(".alert", 70);
     watch(".game", 0);
@@ -687,9 +825,9 @@ var Site = (function () {
     watch(".two", 0);
     watch(".formwrap", 0);
 
-    trackNav();
+    trackScroll();
     trackPointerGlow();
-    trackPlate();
+    armSectionEntrances();
     moveMark(state.current);
 
     setInterval(tick, 1000);

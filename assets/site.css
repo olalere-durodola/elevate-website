@@ -391,7 +391,7 @@ html.switching{view-transition-name:none}
 /* Sits above the page's opaque section grounds but below the sticky nav,
    and screens rather than paints — so it reads as a tracking overlay laid
    over the broadcast, not a line drawn across the text. */
-.arc{position:fixed;inset:0;z-index:55;pointer-events:none;mix-blend-mode:screen}
+.arc{position:fixed;inset:0;z-index:55;pointer-events:none}
 .wrap{position:relative;z-index:1}
 .arc path{fill:none;stroke:var(--ion);stroke-width:1.25;vector-effect:non-scaling-stroke}
 .arc .arc-track{stroke:var(--peri);opacity:.13}
@@ -406,7 +406,7 @@ html.switching{view-transition-name:none}
   .arc-read{display:none}
 }
 .arc-read{
-  position:fixed;left:calc(var(--rail) + 14px);
+  position:fixed;top:0;left:calc(var(--rail) + 14px);will-change:transform;
   font-family:'JetBrains Mono',monospace;font-size:9px;
   letter-spacing:.2em;text-transform:uppercase;color:var(--peri);
   opacity:.55;pointer-events:none;z-index:2;
@@ -547,3 +547,54 @@ html.switching{view-transition-name:none}
   from{opacity:0;transform:translateY(-.42em)}
   to{opacity:1;transform:none}
 }
+
+/* the ball streaks when you scroll fast, settles when you stop */
+.arc .arc-tail{
+  fill:none;stroke:var(--ion);stroke-width:2.4;
+  stroke-linecap:round;opacity:0;
+}
+
+/* court-line wipes: a rule sweeps in from the left the way a baseline
+   is painted, rather than the usual underline fade */
+.nav-links a,.gym a,.pillar a{position:relative}
+.nav-links a::after,.gym a::after,.pillar a::after{
+  content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;
+  background:var(--ion);transform:scaleX(0);transform-origin:left;
+}
+.nav-links a:hover::after,.nav-links a:focus-visible::after,
+.gym a:hover::after,.pillar a:hover::after{transform:scaleX(1)}
+@media(prefers-reduced-motion:no-preference){
+  .nav-links a::after,.gym a::after,.pillar a::after{
+    transition:transform var(--d-pass) var(--e-read);
+  }
+}
+
+/* the primary button fills from the notched corner on hover */
+.btn{position:relative;overflow:hidden;isolation:isolate}
+.btn::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:var(--chalk);transform:scaleX(0);transform-origin:left;
+}
+.btn:hover::before{transform:scaleX(1)}
+.btn.ghost::before{background:rgba(144,187,232,.14)}
+@media(prefers-reduced-motion:no-preference){
+  .btn::before{transition:transform var(--d-shot) var(--e-read)}
+}
+
+/* the opponent badge turns over when a new team takes the floor */
+.crest{transform-style:preserve-3d;backface-visibility:hidden}
+
+/* form fields get a baseline swept under them on focus */
+.field{position:relative}
+.field input,.field select,.field textarea{position:relative;z-index:1}
+.field::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:var(--ion);transform:scaleX(0);transform-origin:left;
+}
+.field:focus-within::after{transform:scaleX(1)}
+@media(prefers-reduced-motion:no-preference){
+  .field::after{transition:transform var(--d-shot) var(--e-read)}
+}
+
+/* the photo band breathes as it passes */
+
