@@ -100,6 +100,28 @@ var Site = (function () {
     if (node) node.textContent = value == null || value === "" ? "—" : value;
   }
 
+  /* Numbers flip like a scoreboard rather than snapping. Each character
+     gets its own cell so "18-4" changing to "21-5" rolls per digit, and
+     only the characters that actually changed animate. */
+  function roll(id, value) {
+    var node = el(id);
+    if (!node) return;
+    var next = value == null || value === "" ? "—" : String(value);
+    if (REDUCED || node.textContent === next) { if (node.textContent !== next) node.textContent = next; return; }
+
+    var previous = node.textContent;
+    node.textContent = "";
+    next.split("").forEach(function (ch, i) {
+      var cell = document.createElement("span");
+      /* white-space:pre on every cell — splitting into spans otherwise
+         collapses the spaces and "18-4 · 7th grade" becomes one word. */
+      cell.className = previous[i] !== ch ? "roll-cell roll-digit" : "roll-cell";
+      cell.textContent = ch;
+      if (previous[i] !== ch) cell.style.animationDelay = (i * 34) + "ms";
+      node.appendChild(cell);
+    });
+  }
+
   /* ---------- site-wide content ---------- */
 
   function renderSite() {
@@ -247,12 +269,12 @@ var Site = (function () {
     if (count) count.hidden = !hasGame;
 
     setText("teamTitle", t.name);
-    setText("mRec", t.record);
+    roll("mRec", t.record);
     setText("mCoach", t.coach);
     setText("mGym", t.homeGym);
-    setText("gUs", (t.record || "") + " · " + t.name);
+    roll("gUs", (t.record || "") + " · " + t.name);
     setText("gOpp", hasGame ? g.opponent : "Not scheduled");
-    setText("gOppR", g.opponentRecord);
+    roll("gOppR", g.opponentRecord);
     setText("oCrest", hasGame ? initials(g.opponent) : "--");
     setText("gTime", g.tipoff ? longDate(g.tipoff) : "Goes up as soon as the bracket lands");
     setText("gArrive", g.arriveBy);
@@ -556,6 +578,9 @@ var Site = (function () {
       chip.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", inline: "center", block: "nearest" });
     }
 
+    /* The next ambient shots are the new team's shooting percentage. */
+    if (window.ArcSpine && !REDUCED) setTimeout(function () { window.ArcSpine.shoot(); }, 520);
+
     var t = state.teams[i];
     announce(t.name + ", " + ((t.roster || []).length) + " players");
   }
@@ -579,6 +604,25 @@ var Site = (function () {
       requestAnimationFrame(function () {
         nav.classList.toggle("tight", window.scrollY > 140);
         ticking = false;
+      });
+    }, { passive: true });
+  }
+
+  /* The one photograph on the page drifts as you pass it, so it has
+     depth instead of sitting flat in the scroll. */
+  function trackPlate() {
+    var plate = el("plate"), media = el("plateMedia");
+    if (!plate || !media || REDUCED) return;
+    var pending = false;
+    window.addEventListener("scroll", function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        var box = plate.getBoundingClientRect();
+        if (box.bottom < 0 || box.top > window.innerHeight) return;
+        var seen = 1 - (box.top + box.height) / (window.innerHeight + box.height);
+        media.style.transform = "translate3d(0," + ((seen - 0.5) * 46).toFixed(1) + "px,0) scale(1.14)";
       });
     }, { passive: true });
   }
@@ -645,6 +689,7 @@ var Site = (function () {
 
     trackNav();
     trackPointerGlow();
+    trackPlate();
     moveMark(state.current);
 
     setInterval(tick, 1000);

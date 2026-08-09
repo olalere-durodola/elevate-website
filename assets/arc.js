@@ -28,6 +28,14 @@
   var pending = false;
   var total = 0;
 
+  /* Ambient shots. Three trajectory variants so repeated shots do not
+     trace the same line, and a pool so nothing is allocated per shot. */
+  var VARIANTS = 3;
+  var lanes = [];        /* {path, length} */
+  var pool = [];         /* reusable trail elements */
+  var ambientTimer = null;
+  var launchGroup = null;
+
   /* Sections the arc is measured against, in flight order. */
   var STOPS = [
     { id: "game", label: "Next game" },
@@ -67,6 +75,19 @@
     ball.setAttribute("class", "arc-ball");
     ball.setAttribute("r", "4.2");
 
+    /* Ambient shots are drawn beneath the spine so they never compete
+       with the one arc the page is actually about. */
+    launchGroup = document.createElementNS(NS, "g");
+    launchGroup.setAttribute("class", "arc-shots");
+
+    for (var v = 0; v < VARIANTS; v++) {
+      var lane = document.createElementNS(NS, "path");
+      lane.setAttribute("class", "arc-lane");
+      svg.appendChild(lane);
+      lanes.push({ el: lane, len: 0 });
+    }
+
+    svg.appendChild(launchGroup);
     svg.appendChild(track);
     svg.appendChild(live);
     svg.appendChild(board);
@@ -77,6 +98,109 @@
     document.body.insertBefore(svg, document.body.firstChild);
 
     path = track;
+  }
+
+  /* ---------- ambient shots ---------- */
+
+  function laneShape(i, w, h, rail) {
+    /* Each lane releases from a slightly different spot and hangs a
+       little differently, so the background never repeats exactly. */
+    var spread = [-0.02, 0.015, 0.045][i];
+    var lift = [0.06, 0.11, 0.155][i];
+    var x0 = rail + w * (0.05 + spread);
+    var y0 = h * 0.97;
+    var x2 = w * (w > 900 ? 0.88 : 0.94);
+    var y2 = h * 0.54;
+    var cx = (x0 + x2) / 2;
+    var cy = (h * lift - 0.25 * y0 - 0.25 * y2) / 0.5;
+    return "M" + x0 + "," + y0 + " Q" + cx + "," + cy + " " + x2 + "," + y2;
+  }
+
+  function borrowTrail() {
+    for (var i = 0; i < pool.length; i++) {
+      if (!pool[i].busy) return pool[i];
+    }
+    var el = document.createElementNS(NS, "path");
+    el.setAttribute("class", "arc-shot");
+    launchGroup.appendChild(el);
+    var slot = { el: el, busy: false };
+    pool.push(slot);
+    return slot;
+  }
+
+  /* A shot goes in at the team's real shooting percentage. 18-4 means
+     82% of the arcs you see in the background drop. Switch to a team with
+     a worse record and more of them rim out. */
+  function makeRate() {
+    try {
+      var t = Site.state.teams[Site.state.current];
+      var m = /^(\d+)\s*-\s*(\d+)$/.exec(String(t.record || ""));
+      if (!m) return 0.78;
+      var w = +m[1], l = +m[2];
+      return (w + l) ? Math.max(0.35, Math.min(0.95, w / (w + l))) : 0.78;
+    } catch (e) { return 0.78; }
+  }
+
+  function fireShot(opts) {
+    opts = opts || {};
+    var lane = lanes[Math.floor(Math.random() * lanes.length)];
+    if (!lane.len) return;
+
+    var slot = borrowTrail();
+    slot.busy = true;
+
+    var el = slot.el;
+    var goesIn = opts.make !== undefined ? opts.make : Math.random() < makeRate();
+    var duration = opts.duration || (900 + Math.random() * 180);
+    var trail = 74;
+
+    el.setAttribute("d", lane.el.getAttribute("d"));
+    el.style.strokeDasharray = trail + " " + (lane.len + trail);
+    el.style.opacity = opts.opacity == null ? "" : opts.opacity;
+
+    /* A miss stops short and never reaches the rim. */
+    var end = goesIn ? -(lane.len + trail) : -(lane.len * 0.9);
+
+    var anim = el.animate(
+      [{ strokeDashoffset: trail }, { strokeDashoffset: end }],
+      { duration: duration, easing: "cubic-bezier(.34,.02,.28,1)", fill: "forwards" }
+    );
+
+    if (goesIn) {
+      setTimeout(function () { netRipple(opts.strong ? 1 : 0.55); }, duration * 0.93);
+    }
+
+    anim.finished.catch(function () {}).then(function () {
+      el.style.opacity = "0";
+      slot.busy = false;
+    });
+  }
+
+  function netRipple(strength) {
+    ripple.style.transition = "none";
+    ripple.setAttribute("r", "3");
+    ripple.style.opacity = String(0.85 * strength);
+    requestAnimationFrame(function () {
+      ripple.style.transition = "r 620ms cubic-bezier(.2,0,0,1), opacity 620ms linear";
+      ripple.setAttribute("r", String(26 + 22 * strength));
+      ripple.style.opacity = "0";
+    });
+  }
+
+  function startAmbient() {
+    if (REDUCED) return;
+    stopAmbient();
+    var loop = function () {
+      /* Only spend frames while the hero is actually on screen. */
+      if (window.scrollY < window.innerHeight * 1.4 && !document.hidden) fireShot();
+      ambientTimer = setTimeout(loop, 3400 + Math.random() * 2600);
+    };
+    ambientTimer = setTimeout(loop, 2600);
+  }
+
+  function stopAmbient() {
+    if (ambientTimer) clearTimeout(ambientTimer);
+    ambientTimer = null;
   }
 
   /* The parabola is defined in viewport coordinates and redrawn on resize.
@@ -101,6 +225,11 @@
     var d = "M" + x0 + "," + y0 + " Q" + cx + "," + cy + " " + x2 + "," + y2;
     track.setAttribute("d", d);
     live.setAttribute("d", d);
+
+    lanes.forEach(function (lane, i) {
+      lane.el.setAttribute("d", laneShape(i, w, h, rail));
+      lane.len = lane.el.getTotalLength();
+    });
 
     /* rim and backboard at the arrival point */
     rim.setAttribute("x1", x2 - 22); rim.setAttribute("x2", x2 + 22);
@@ -140,20 +269,9 @@
     var apex = window.innerHeight * 0.18 - window.innerHeight * 0.36;
     var alt = Math.max(0, Math.min(1, 1 - (pt.y / window.innerHeight)));
 
-    /* Arrival. The one moment on the page where pink moves on its own. */
-    if (p > 0.985 && !made) {
-      made = true;
-      ripple.style.transition = "none";
-      ripple.setAttribute("r", "3");
-      ripple.style.opacity = ".85";
-      requestAnimationFrame(function () {
-        ripple.style.transition = "r 620ms cubic-bezier(.2,0,0,1), opacity 620ms linear";
-        ripple.setAttribute("r", "46");
-        ripple.style.opacity = "0";
-      });
-    } else if (p < 0.94) {
-      made = false;
-    }
+    /* Arrival by scroll: reaching the join form completes the shot. */
+    if (p > 0.985 && !made) { made = true; netRipple(1); }
+    else if (p < 0.94) { made = false; }
 
     readouts.forEach(function (r) {
       var box = r.section.getBoundingClientRect();
@@ -206,9 +324,28 @@
     shape();
     draw();
 
+    /* THE OPENING SHOT.
+       The page announces itself by taking the shot it is about: one arc
+       travels the full trajectory, the net takes it, and control then
+       hands over to your scroll position. It only runs at the top of the
+       page — arriving mid-page from a link should not stage a show. */
+    if (window.scrollY < 40) {
+      setTimeout(function () { fireShot({ make: true, duration: 1080, strong: true }); }, 420);
+    }
+
+    startAmbient();
+    document.addEventListener("visibilitychange", function () {
+      document.hidden ? stopAmbient() : startAmbient();
+    });
+
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", function () { shape(); draw(); }, { passive: true });
   }
+
+  /* A team switch re-seeds the background: the next shots you see are
+     the new team's shooting. Nobody consciously notices. It is why it
+     feels true. */
+  window.ArcSpine = { shoot: fireShot };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);
