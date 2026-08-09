@@ -1,0 +1,321 @@
+/* ============================================================
+   console.css — the coach's edit console.
+
+   Desktop: the site's left rail widens into a working column and
+   the page reflows beside it, so edits are visible as they happen.
+   Phone: a sheet that slides up from the bottom, sized so the page
+   stays visible above it.
+
+   Nothing here loads for visitors. The console only renders when
+   the page is opened with ?edit.
+   ============================================================ */
+
+:root {
+  --ed-w: 440px;
+  --ed-row: rgba(144, 187, 232, .07);
+}
+
+/* ---------- shell ---------- */
+
+.ed {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--ed-w);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: var(--deep);
+  border-right: 1px solid var(--line-2);
+  font-family: 'Sora', system-ui, sans-serif;
+  color: var(--chalk);
+}
+
+/* The page shifts over instead of being covered, so a coach can see
+   the change land in the real layout. */
+body.ed-open .wrap { padding-left: var(--ed-w); }
+body.ed-open .ladder { display: none; }
+
+.ed-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--void);
+}
+.ed-mark {
+  font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 100, 'wght' 900;
+  font-size: 14px; text-transform: uppercase; letter-spacing: .02em;
+  color: var(--ion);
+}
+.ed-who {
+  flex: 1; min-width: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--dim);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.ed-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 24px; }
+
+.ed-foot {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--void);
+}
+.ed-status {
+  flex: 1; min-width: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  letter-spacing: .06em; color: var(--dim); line-height: 1.5;
+}
+.ed-status.warn { color: var(--ion); }
+.ed-status.ok { color: var(--peri); }
+
+/* ---------- tabs ---------- */
+
+/* The strip scrolls; the fade on the right edge is what tells a coach
+   there are more tabs than fit. */
+.ed-tabs {
+  display: flex; overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: var(--void);
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+}
+.ed-tabs::-webkit-scrollbar { display: none; }
+.ed-tab {
+  flex: none;
+  background: none; border: none; border-right: 1px solid var(--line);
+  color: var(--dim); cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .16em; text-transform: uppercase;
+  padding: 13px 15px; white-space: nowrap;
+}
+.ed-tab[aria-selected="true"] { color: var(--ion); box-shadow: inset 0 -2px 0 var(--ion); }
+.ed-tab:focus-visible { outline: 2px solid var(--peri); outline-offset: -3px; }
+
+/* ---------- team picker ---------- */
+
+.ed-pick {
+  display: flex; gap: 8px; align-items: center;
+  padding: 14px 18px; border-bottom: 1px solid var(--line);
+}
+.ed-pick select { flex: 1; }
+
+/* ---------- form primitives ---------- */
+
+.ed-group { padding: 18px; border-bottom: 1px solid var(--line); }
+.ed-group:last-child { border-bottom: none; }
+
+.ed-legend {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--peri);
+  margin-bottom: 14px;
+}
+.ed-legend em { font-style: normal; color: var(--dim); }
+
+.ed-f { display: flex; flex-direction: column; margin-bottom: 12px; }
+.ed-f:last-child { margin-bottom: 0; }
+.ed-f > label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--dim);
+  margin-bottom: 6px;
+}
+.ed-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ed-pair.tight { grid-template-columns: 74px 1fr; }
+
+.ed input, .ed select, .ed textarea {
+  width: 100%;
+  background: var(--void);
+  border: 1px solid var(--line);
+  color: var(--chalk);
+  font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 300;
+  padding: 10px 11px;
+  border-radius: 0;
+  transition: border-color .16s;
+}
+.ed textarea { resize: vertical; min-height: 76px; line-height: 1.55; }
+.ed input:focus, .ed select:focus, .ed textarea:focus { outline: none; border-color: var(--ion); }
+.ed select {
+  appearance: none; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--dim) 50%), linear-gradient(135deg, var(--dim) 50%, transparent 50%);
+  background-position: calc(100% - 17px) 17px, calc(100% - 12px) 17px;
+  background-size: 5px 5px; background-repeat: no-repeat;
+}
+
+/* ---------- repeating rows ---------- */
+
+.ed-list { display: flex; flex-direction: column; gap: 8px; }
+
+.ed-item {
+  background: var(--ed-row);
+  border: 1px solid var(--line);
+  padding: 11px 11px 11px 9px;
+  display: grid;
+  grid-template-columns: 22px 1fr 26px;
+  gap: 9px;
+  align-items: start;
+}
+.ed-item-fields { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+/* Reordering by button rather than drag: a coach can do it with a
+   thumb on a phone or with the keyboard, neither of which drag serves. */
+.ed-move { display: flex; flex-direction: column; gap: 4px; }
+.ed-nudge {
+  background: none; border: 1px solid var(--line);
+  color: var(--dim); cursor: pointer;
+  width: 22px; height: 22px; padding: 0;
+  font-size: 8px; line-height: 1;
+  transition: color .16s, border-color .16s;
+}
+.ed-nudge:hover:not(:disabled) { color: var(--ion); border-color: var(--ion); }
+.ed-nudge:disabled { opacity: .3; cursor: default; }
+.ed-nudge:focus-visible { outline: 2px solid var(--peri); outline-offset: 1px; }
+
+.ed-pick-k {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--dim);
+}
+
+.ed-del {
+  background: none; border: 1px solid var(--line);
+  color: var(--dim); cursor: pointer;
+  width: 26px; height: 26px; line-height: 1;
+  font-size: 14px;
+  transition: color .16s, border-color .16s;
+}
+.ed-del:hover { color: var(--ion); border-color: var(--ion); }
+.ed-del:focus-visible { outline: 2px solid var(--peri); outline-offset: 2px; }
+
+/* ---------- buttons ---------- */
+
+.ed-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 86, 'wght' 800;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 11px 16px;
+  background: var(--ion); color: #12000A;
+  border: none; cursor: pointer;
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+}
+.ed-btn:disabled { opacity: .45; cursor: default; }
+.ed-btn.ghost {
+  background: transparent; color: var(--chalk);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  clip-path: none;
+}
+.ed-btn.ghost:hover:not(:disabled) { background: rgba(144, 187, 232, .09); }
+.ed-btn:focus-visible { outline: 2px solid var(--peri); outline-offset: 3px; }
+
+.ed-add {
+  margin-top: 10px;
+  width: 100%;
+  background: none; border: 1px dashed var(--line-2);
+  color: var(--peri); cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  letter-spacing: .14em; text-transform: uppercase;
+  padding: 11px;
+  transition: border-color .16s, color .16s;
+}
+.ed-add:hover { border-color: var(--ion); color: var(--ion); }
+.ed-add:focus-visible { outline: 2px solid var(--peri); outline-offset: 2px; }
+
+/* Deleting a whole team should not look like the button above it. */
+.ed-add.danger { color: var(--dim); border-style: solid; }
+.ed-add.danger:hover { color: var(--ion); border-color: var(--ion); background: var(--ion-soft); }
+
+.ed-x {
+  background: none; border: none; cursor: pointer;
+  color: var(--dim); font-size: 17px; line-height: 1; padding: 4px 6px;
+}
+.ed-x:hover { color: var(--chalk); }
+.ed-x:focus-visible { outline: 2px solid var(--peri); }
+
+/* ---------- sign in ---------- */
+
+.ed-gate { padding: 26px 20px; }
+.ed-gate h2 {
+  font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 104, 'wght' 800;
+  font-size: 26px; text-transform: uppercase; line-height: .98;
+  margin-bottom: 12px;
+}
+.ed-gate p { font-size: 13.5px; line-height: 1.65; color: var(--dim); margin-bottom: 18px; }
+.ed-gate .ed-btn { width: 100%; margin-top: 12px; }
+.ed-note {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line);
+  font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+  line-height: 1.7; color: var(--dim);
+}
+.ed-note a { color: var(--peri); }
+
+/* ---------- requests ---------- */
+
+.ed-lead { border: 1px solid var(--line); background: var(--ed-row); padding: 13px; margin-bottom: 8px; }
+.ed-lead.handled { opacity: .5; }
+.ed-lead b { font-size: 14px; font-weight: 400; display: block; }
+.ed-lead .ed-lead-k {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ion);
+  margin-bottom: 7px;
+}
+.ed-lead p { font-size: 13px; color: var(--dim); line-height: 1.6; margin-top: 7px; }
+.ed-lead a { color: var(--peri); font-size: 13px; word-break: break-all; }
+.ed-lead-foot { display: flex; align-items: center; gap: 10px; margin-top: 11px; }
+.ed-lead-foot label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+  display: flex; align-items: center; gap: 7px; cursor: pointer;
+}
+.ed-lead-foot input { width: 15px; height: 15px; accent-color: var(--ion); }
+
+.ed-empty {
+  padding: 30px 18px; text-align: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .1em; color: var(--dim); line-height: 1.8;
+}
+
+/* ---------- the way in ----------
+   A quiet footer link rather than a floating button: coaches can find it
+   on a phone without typing ?edit, and it does not intrude on the page
+   for the parents who make up almost all the traffic. */
+
+.foot-edit {
+  background: none; border: none; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--dim); padding: 4px 0;
+  border-bottom: 1px solid transparent;
+  transition: color .18s, border-color .18s;
+}
+.foot-edit:hover { color: var(--ion); border-bottom-color: var(--ion); }
+.foot-edit:focus-visible { outline: 2px solid var(--peri); outline-offset: 3px; }
+body.ed-open .foot-edit { visibility: hidden; }
+
+/* ---------- phone ---------- */
+
+@media (max-width: 900px) {
+  .ed {
+    left: 0; right: 0; top: auto;
+    width: auto;
+    height: 82vh; height: 82dvh;
+    border-right: none;
+    border-top: 1px solid var(--line-2);
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, .7);
+  }
+  body.ed-open .wrap { padding-left: 0; padding-bottom: 82vh; padding-bottom: 82dvh; }
+  body.ed-open .mrail { display: none; }
+
+  /* 16px keeps iOS from zooming the page every time a field is tapped. */
+  .ed input, .ed select, .ed textarea { font-size: 16px; padding: 12px; }
+  .ed-item { grid-template-columns: 26px 1fr 30px; }
+  .ed-nudge { width: 26px; height: 26px; }
+  .ed-del { width: 30px; height: 30px; }
+  .ed-tab { padding: 14px 16px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.ed-open .wrap { transition: padding-left .3s cubic-bezier(.16, 1, .3, 1); }
+}
