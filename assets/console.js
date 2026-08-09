@@ -270,7 +270,7 @@
           field("Record", t, "record", { placeholder: "18-4" }),
           field("Home gym", t, "homeGym", { placeholder: "Prosper Fieldhouse" })
         ]),
-        field("Head coach", t, "coach", { placeholder: "Coach Whitfield" }),
+        field("Head coach", t, "coach", { placeholder: "Coach Zae" }),
         field("Coach email", t, "coachEmail", { type: "email", placeholder: "coach@elevatehoops.com" })
       ]),
       group("All teams", Site.state.teams.length, [

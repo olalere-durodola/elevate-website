@@ -106,7 +106,7 @@ a{color:inherit}
 .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.26em;color:var(--peri);text-transform:uppercase;margin-bottom:18px}
 .h1{position:relative;display:inline-block;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:var(--t1);line-height:.9;text-transform:uppercase;letter-spacing:-.015em}
 /* The free-throw semicircle used to hang below this rule and cut straight
-   through "Coach Whitfield" at every width. The court geometry now lives in
+   through the coach line at every width. The court geometry now lives in
    the arc spine, where it has room. */
 .cutline{position:relative;margin:30px 0 0;height:1px;background:var(--peri);opacity:.55}
 .claim{margin-top:24px;font-size:20px;line-height:1.5;max-width:520px;color:var(--dim);font-weight:300}
